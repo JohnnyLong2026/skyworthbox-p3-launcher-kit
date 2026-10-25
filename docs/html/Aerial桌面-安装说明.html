@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aerial 桌面安装说明 - 创维小湃P3</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 24px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f4; color: #2c2c2a; line-height: 1.75; }
+  .wrap { max-width: 900px; margin: 0 auto; background: #fff; border: 1px solid #e8e8e6; border-radius: 12px; padding: 40px 44px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: #6b6b68; font-size: 13px; margin-bottom: 28px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #ececea; }
+  h3 { font-size: 14px; font-weight: 600; margin: 20px 0 8px; }
+  p, li { font-size: 13.5px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+  .card { background: #f7f7f5; border-radius: 10px; padding: 14px 16px; }
+  .card .k { font-size: 12px; color: #6b6b68; }
+  .card .v { font-size: 15px; font-weight: 600; margin-top: 4px; word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { text-align: left; padding: 9px 10px; background: #f7f7f5; color: #5f5e5a; font-weight: 500; border-bottom: 1px solid #e8e8e6; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f0f0ee; vertical-align: top; }
+  td.mono, code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  code { background: #f2f2f0; padding: 1px 6px; border-radius: 4px; }
+  td.mono { color: #444441; word-break: break-all; }
+  pre { background: #2c2c2a; color: #e8e8e6; padding: 14px 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; line-height: 1.65; }
+  .note { background: #fcfcfb; border-left: 3px solid #ba7517; padding: 12px 16px; font-size: 13px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  .warn { background: #fdf6f6; border-left: 3px solid #e24b4a; padding: 12px 16px; font-size: 13px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  .ok { background: #f4f9f0; border-left: 3px solid #639922; padding: 12px 16px; font-size: 13px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; font-size: 12.5px; }
+  .node { background: #f7f7f5; border: 1px solid #e8e8e6; border-radius: 8px; padding: 8px 12px; }
+  .arrow { color: #888; }
+  .foot { margin-top: 36px; padding-top: 16px; border-top: 1px solid #ececea; color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Aerial 桌面安装说明</h1>
+  <div class="sub">创维小湃P3 · 192.168.1.100 · 2026-10-25 · Aerial 1.49 定制版（含定时启动移植）</div>
+
+  <div class="cards">
+    <div class="card"><div class="k">桌面包名</div><div class="v">com.ktcp.launcher.aerial</div></div>
+    <div class="card"><div class="k">原项目</div><div class="v">app.orchard.tv</div></div>
+    <div class="card"><div class="k">版本</div><div class="v">1.49</div></div>
+    <div class="card"><div class="k">定时启动</div><div class="v">已移植，v3.1</div></div>
+  </div>
+
+  <h2>一、装了什么</h2>
+  <table>
+    <thead><tr><th style="width:42%">文件</th><th style="width:30%">包名</th><th style="width:28%">说明</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="mono">Aerial桌面-v1.49-盒子定制版.apk</td>
+        <td class="mono">com.ktcp.launcher.aerial</td>
+        <td>由上游源码编译，改了包名并加入定时启动钩子</td>
+      </tr>
+      <tr>
+        <td class="mono">定时启动-TVAutoStart-v3.1.apk</td>
+        <td class="mono">com.ktcp.launcher.autostart</td>
+        <td>新增「接收桌面信号」能力，原配置和目标 App 全部保留</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>二、为什么包名不是 app.orchard.tv</h2>
+  <p>这台创维盒子在系统框架层维护了一份<strong>桌面包名前缀白名单</strong>（logcat 里能看到 <code>allow home apk</code> / <code>block home apk</code>）。只有前缀命中的包才能成为默认桌面，其余即便声明了 HOME 也会被系统忽略。</p>
+  <p><code>app.orchard.tv</code> 不在名单里，直接装官方包无法接管桌面。而 <code>com.ktcp.launcher</code> 是白名单里的前缀且当前空闲，所以 Aerial 以 <code>com.ktcp.launcher.aerial</code> 的身份安装 —— 只改安装包名，Java 命名空间保持 <code>app.orchard.tv</code> 不动，功能和后续维护都不受影响。</p>
+  <div class="note">
+    这也是之前 CleanYourTV 能用 <code>com.ktcp.launcher</code> 当桌面的同一套原理。区别是它俩不能同时占用同一前缀：CleanYourTV 用的是 <code>com.ktcp.launcher</code> 本身，Aerial 用的是它的子前缀，两者互不冲突。
+  </div>
+
+  <h2>三、定时启动怎么保留的</h2>
+  <p>原来的「开机 N 秒后弹窗并跳转」是挂在 CleanYourTV 桌面里的钩子，换桌面后必然失效。这套固件又<strong>封死了所有第三方开机广播</strong>（<code>Block auto start app from broadcast</code>），App 自己无法在开机时醒来。所以改成由 Aerial 交出这个时刻：</p>
+  <div class="chain">
+    <span class="node">开机</span><span class="arrow">→</span>
+    <span class="node">Aerial 作为桌面启动</span><span class="arrow">→</span>
+    <span class="node">判定「本次开机的首次进入」<br><span style="color:#888">BOOT_COUNT + 3 分钟窗口</span></span><span class="arrow">→</span>
+    <span class="node">拉起定时启动服务</span><span class="arrow">→</span>
+    <span class="node">延迟 N 秒弹窗</span><span class="arrow">→</span>
+    <span class="node">跳转目标 App</span>
+  </div>
+  <p>只改了两处代码：Aerial 侧新增 <code>system/AutostartBridge.kt</code>（约 40 行，每次开机只触发一次），定时启动侧把服务改成可被外部唤起并识别 <code>ACTION_ARM</code>。你的延时秒数和目标 App 都沿用原来的配置，没有变化。</p>
+  <div class="ok">
+    <strong>实测通过：</strong>重启后 Aerial 自动成为桌面 → 服务被唤起 → 浮层盖在 Aerial 上倒计时 →「1 秒后自动跳转至 影视仓」→ 准时跳转。按遥控器任意键仍可取消。
+  </div>
+
+  <h2>四、桌面怎么用</h2>
+  <table>
+    <thead><tr><th style="width:34%">操作</th><th style="width:66%">效果</th></tr></thead>
+    <tbody>
+      <tr><td>方向键左右</td><td>在第一排 App 之间移动</td></tr>
+      <tr><td>往下</td><td>展开全部 App</td></tr>
+      <tr><td>第一排按<strong>上</strong></td><td>打开控制中心（信号源、网络、设置、音量、亮度、个性化）</td></tr>
+      <tr><td>长按 <strong>OK</strong> / 菜单键</td><td>整理：移动、建文件夹、隐藏、卸载</td></tr>
+      <tr><td>手机扫码</td><td>个性化里有二维码，手机端可拖拽排序、改名、换图标、上传壁纸</td></tr>
+      <tr><td>闲置 10 秒</td><td>壁纸后面开始播航拍动态效果，按任意键停在当前画面</td></tr>
+    </tbody>
+  </table>
+  <p>第一排最左边那个灰色渐变图标是系统里某个没有名称的组件，长按 OK 就能隐藏掉，不影响任何功能。</p>
+
+  <h2>五、注意事项</h2>
+  <div class="warn">
+    <strong>不要用 Aerial 控制中心里的「检查更新」。</strong>它下载的是官方包 <code>app.orchard.tv</code>，装上后会变成<strong>另一个独立应用</strong>，而不是替换当前这个定制版，桌面还会留在旧版本上。想升级时告诉我，我按同样方式重新编译一版。
+  </div>
+  <ul>
+    <li>已按官方脚本补齐授权：精确定位（读 Wi-Fi 名称）、WRITE_SECURE_SETTINGS、悬浮窗、改亮度、安装未知应用、通知监听，并对 APK 做了 speed 编译优化。</li>
+    <li>原 CleanYourTV 桌面<strong>没有卸载</strong>，只是不再是默认桌面。万一 Aerial 出问题，执行下面的命令就能回到旧桌面。</li>
+    <li>系统的广告屏保（待机时的推广画面）仍然存在。Aerial 自带的航拍屏保可以在设置里启用；若想让待机也播航拍，需要把它的 Dream 组件设成系统屏保 —— 你需要的话我来做。</li>
+  </ul>
+
+  <h2>六、回滚</h2>
+  <pre>adb connect 192.168.1.100:5555
+adb shell cmd package set-home-activity com.ktcp.launcher/com.gathin.tvhome.MainActivity
+adb shell input keyevent KEYCODE_HOME</pre>
+  <p>要彻底回到没有 Aerial 的状态，卸载它即可（不影响定时启动，钩子会自动跳过不存在的包）：</p>
+  <pre>adb shell pm uninstall com.ktcp.launcher.aerial</pre>
+
+  <div class="foot">源码位于 <code>aerial-tv/</code>，改动只有 <code>app/build.gradle.kts</code>（包名）、<code>system/AutostartBridge.kt</code>（新增）、<code>MainActivity.kt</code>（一行调用）。APK 在项目根目录。</div>
+
+</div>
+</body>
+</html>

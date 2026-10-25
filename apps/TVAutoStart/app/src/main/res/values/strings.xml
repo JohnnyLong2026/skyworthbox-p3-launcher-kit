@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">定时启动</string>
+    <string name="title">定时启动</string>
+
+    <string name="delay_label">延时</string>
+    <string name="target_label">跳转程序</string>
+    <string name="pick_app">选择应用</string>
+    <string name="no_app">未选择</string>
+
+    <string name="save">保存</string>
+    <string name="reset">还原</string>
+    <string name="preview">预览</string>
+
+    <string name="status_none">未设置 · 开机后不会跳转</string>
+    <string name="status_current">已设置：%1$s · 延时 %2$d 秒</string>
+
+    <string name="reminder_target">%s</string>
+    <string name="reminder_countdown">秒后自动跳转</string>
+    <string name="reminder_cancel_tip">按任意键取消</string>
+
+    <string name="notification_title">定时启动已就绪</string>
+    <string name="notification_desc">开机后将在桌面上弹出提醒窗口</string>
+
+    <string name="picker_title">选择应用</string>
+    <string name="picker_empty">没有可用的应用</string>
+    <string name="only_third_party">第三方</string>
+    <string name="all_apps">全部</string>
+    <string name="saved">已保存</string>
+    <string name="reset_done">已还原，跳转程序与延时已清空</string>
+    <string name="pick_first">请先选择要启动的应用</string>
+    <string name="save_first">请先保存设置</string>
+    <string name="launch_failed">无法启动该应用</string>
+</resources>

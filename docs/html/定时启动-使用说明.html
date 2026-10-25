@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>定时启动 v4.0 · 使用说明</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --panel:#141417; --panel2:#1c1c20; --line:#ffffff1f;
+    --txt:#fff; --dim:#ffffffa6; --dim2:#ffffff6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.75 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+       padding:48px 24px 72px}
+  .wrap{max-width:860px;margin:0 auto}
+  h1{font-size:34px;margin:0 0 6px;letter-spacing:.02em}
+  .sub{color:var(--dim2);margin:0 0 36px;font-size:14px}
+  h2{font-size:19px;margin:44px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  h3{font-size:15px;margin:26px 0 8px;color:var(--txt)}
+  p,li{color:var(--dim)}
+  ul{padding-left:20px}
+  li{margin:6px 0}
+  code{background:#ffffff14;padding:1px 6px;border-radius:5px;font-size:13px;
+       font-family:ui-monospace,Consolas,monospace;color:#fff}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+      padding:14px 16px;overflow:auto;font-size:12.5px;line-height:1.7;color:var(--dim)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim2);font-weight:500;font-size:12.5px;letter-spacing:.06em}
+  td{color:var(--dim)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+        padding:18px 22px;margin:16px 0}
+  .k{color:#fff;font-weight:600}
+  .warn{border-color:#ffd60a33;background:#ffd60a0d}
+  .ok{border-color:#32d74b33;background:#32d74b0d}
+  hr{border:0;border-top:1px solid var(--line);margin:36px 0}
+  .tag{display:inline-block;font-size:11.5px;letter-spacing:.08em;color:#0a0a0c;
+       background:#fff;border-radius:999px;padding:2px 10px;margin-left:10px;
+       vertical-align:3px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>定时启动 v4.0<span class="tag">Apple TV 风格</span></h1>
+  <p class="sub">创维小湃 P3 · 桌面 Aerial 1.49 · 2026-10-25</p>
+
+  <div class="card ok">
+    <p style="margin:0"><span class="k">开机实测已通过：</span>
+    重启 → Aerial 自动成为桌面 → 定时启动被唤起 → 浮层倒计时 9 秒 → 按时跳转影视仓。
+    桌面天气已固定为本地城市（示例中以 <span class="k">北京</span> 代指）。</p>
+  </div>
+
+  <h2>这次改了什么</h2>
+  <table>
+    <tr><th>项目</th><th>改动</th></tr>
+    <tr><td>CleanYourTV 桌面</td><td>已卸载（<code>com.ktcp.launcher</code>），Aerial 成为唯一桌面</td></tr>
+    <tr><td>Aerial 天气城市</td><td>由「按 IP 猜测」改为「手动指定城市」，定位已固定</td></tr>
+    <tr><td>界面风格</td><td>设置页 / 应用列表 / 提醒浮层 全部改为 tvOS 视觉语言</td></tr>
+    <tr><td>Logo</td><td>改为纯白、加大，横幅上只保留「定时启动」四个字</td></tr>
+    <tr><td>提醒浮层</td><td>倒计时 5 秒 → <span class="k">9 秒</span>；窗口宽度 660dp → <span class="k">336dp</span>（约缩一半）</td></tr>
+    <tr><td>「取消」按钮</td><td>改为 <span class="k">「还原」</span>，点击直接清空已保存的程序与延时</td></tr>
+    <tr><td>设置页 Logo</td><td>与桌面图块使用同一个图形（同一条矢量路径生成）</td></tr>
+  </table>
+
+  <h2>界面怎么用</h2>
+
+  <h3>设置页</h3>
+  <ul>
+    <li><span class="k">延时</span>：5 / 10 / 15 秒三档。这是「进入桌面后多久弹出提醒」，白色是被选中的那一档。</li>
+    <li><span class="k">跳转程序</span>：点开列出所有有桌面入口的第三方应用。</li>
+    <li><span class="k">保存</span>：写入设置，底部状态行立刻更新。</li>
+    <li><span class="k">还原</span>：<span style="color:#fff">不是撤销刚才的改动</span>，而是把已保存的程序和延时一起清空，回到「未设置 · 开机后不会跳转」。想彻底停用这个功能就用它。</li>
+    <li><span class="k">预览</span>：立刻弹出一次提醒窗，不用等重启。</li>
+  </ul>
+  <p>遥控器操作：方向键移动，中间的 OK 键确认。聚焦的控件会放大 6% 并浮起一圈白边。</p>
+
+  <h3>提醒浮层</h3>
+  <ul>
+    <li>浮层盖在桌面上，倒计时从 9 开始，进度条同步收缩。</li>
+    <li>倒数结束自动打开设定的应用。</li>
+    <li><span class="k">按遥控器任意键即取消</span>这一次跳转，浮层立刻关闭，不会误触。</li>
+  </ul>
+
+  <h3>实际节奏</h3>
+  <p>开机 → 桌面绘制完成 → 等 2 秒 + 你设定的延时 → 浮层出现 → 倒数 9 秒 → 跳转。<br>
+  选 5 秒时，从看到桌面到跳转约 <span class="k">16 秒</span>。</p>
+
+  <h2>设计上的取舍</h2>
+  <ul>
+    <li><span class="k">只有一个强调色：白。</span>原来的琥珀色被去掉，选中态用实心白、聚焦态用白描边 + 放大 —— 这是 tvOS 的做法，也避免了彩色在电视上显脏。</li>
+    <li><span class="k">分区标签用小号浅灰</span>（「延时」「跳转程序」），信息层级靠字号和灰度拉开，不靠色块。</li>
+    <li><span class="k">列表行不加缩放。</span>只有在列表里做放大，行与行会互相压住；改用整条浅色高亮条，和 tvOS 设置列表一致。</li>
+    <li><span class="k">浮层比原来小一半</span>，但数字反而更大 —— 小窗口里留白越少，远距离越读得清。</li>
+  </ul>
+
+  <h2>桌面上那个图块</h2>
+  <p>Aerial 读取的是 APK 里的 <code>android:banner</code>（16:9 横图），<span class="k">不是方形图标</span>。
+  所以桌面显示的是「白色时钟 + 定时启动」那张横幅；方形图标只出现在系统设置的应用信息里。
+  两者图形同源，改一处会一起变。</p>
+
+  <h2>版本与回滚</h2>
+  <table>
+    <tr><th>文件</th><th>说明</th></tr>
+    <tr><td><code>定时启动-TVAutoStart-v4.0.apk</code></td><td>当前版本（白色 logo + Apple TV 界面 + 9 秒）</td></tr>
+    <tr><td><code>定时启动-TVAutoStart-v3.2.apk</code></td><td>回滚用：琥珀色 logo 的旧界面</td></tr>
+    <tr><td><code>backup/logo-old/</code></td><td>旧图标、旧横幅、旧矢量图</td></tr>
+    <tr><td><code>backup/old-launcher/</code></td><td>已卸载的 CleanYourTV 安装包与说明</td></tr>
+  </table>
+  <pre># 回滚到旧界面
+adb install -r 定时启动-TVAutoStart-v3.2.apk
+
+# 重装后如果桌面图标状态异常，清一次缓存状态
+adb shell monkey -p com.ktcp.launcher.autostart -c android.intent.category.LEANBACK_LAUNCHER 1</pre>
+
+  <div class="card warn">
+    <p style="margin:0"><span class="k">两点注意</span></p>
+    <ul style="margin-bottom:0">
+      <li>卸载 CleanYourTV 后，<code>/sdcard/Android/data/com.ktcp.launcher/</code> 里那份开机钩子配置已无用，已一并清掉；Aerial 的钩子走自己的通道，不受影响。</li>
+      <li>以后若要恢复创维官方桌面，务必<span class="k">先 <code>pm enable com.skyworthdigital.sky2dlauncherv4</code> 再重启</span>，顺序反了会卡开机画面。</li>
+    </ul>
+  </div>
+
+  <h2>改尺寸 / 改文案怎么做</h2>
+  <p>所有图形都是脚本生成的，改参数重跑即可：</p>
+  <table>
+    <tr><th>脚本</th><th>作用</th></tr>
+    <tr><td><code>tools/make_logo_white.py</code></td><td>白色时钟图形：矢量 <code>ic_alarm.xml</code>、5 档 mipmap、桌面横幅、通知小图标，一次全出</td></tr>
+    <tr><td><code>tools/make_vector.py</code></td><td>旧版矢量脚本（已由上面那个取代）</td></tr>
+    <tr><td><code>res/values/colors.xml</code></td><td>整套 tvOS 配色，想换强调色改 <code>accent</code> 一处</td></tr>
+    <tr><td><code>res/animator/focus_lift.xml</code></td><td>聚焦放大倍数（现在是 1.06）</td></tr>
+  </table>
+
+  <hr>
+  <p class="sub" style="margin:0">设备：创维小湃 P3 · 192.168.1.100 · 1920×1080 @ 320dpi · 桌面 Aerial 1.49（包名 com.ktcp.launcher.aerial）</p>
+
+</div>
+</body>
+</html>

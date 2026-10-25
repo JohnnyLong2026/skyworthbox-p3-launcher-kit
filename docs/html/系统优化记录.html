@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>创维小湃P3 运行状态检查与优化记录</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 24px;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f5f4; color: #2c2c2a; line-height: 1.7;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; background: #fff; border: 1px solid #e8e8e6; border-radius: 12px; padding: 40px 44px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: #6b6b68; font-size: 13px; margin-bottom: 28px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #ececea; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0; }
+  .card { background: #f7f7f5; border-radius: 10px; padding: 14px 16px; }
+  .card .k { font-size: 12px; color: #6b6b68; }
+  .card .v { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .card .n { font-size: 12px; color: #993c1d; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { text-align: left; padding: 9px 10px; background: #f7f7f5; color: #5f5e5a; font-weight: 500; border-bottom: 1px solid #e8e8e6; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f0f0ee; vertical-align: top; }
+  td.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #444441; word-break: break-all; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .t-off { background: #faece7; color: #993c1d; }
+  .t-keep { background: #e6f1fb; color: #185fa5; }
+  .t-tune { background: #eaf3de; color: #3b6d11; }
+  .note { background: #fcfcfb; border-left: 3px solid #ba7517; padding: 12px 16px; font-size: 13px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  .warn { background: #fdf6f6; border-left: 3px solid #e24b4a; padding: 12px 16px; font-size: 13px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  code { background: #f2f2f0; padding: 1px 6px; border-radius: 4px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  pre { background: #2c2c2a; color: #e8e8e6; padding: 14px 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; line-height: 1.6; }
+  ul { padding-left: 20px; margin: 10px 0; }
+  li { margin: 4px 0; font-size: 13px; }
+  .foot { margin-top: 36px; padding-top: 16px; border-top: 1px solid #ececea; color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>创维小湃P3 运行状态检查与优化记录</h1>
+  <div class="sub">设备 192.168.1.100 · Android 10（Q5001 / cupid_p2）· 检查时间 2026-10-24 20:30 · 全程通过 ADB，未获取 root、未删除任何文件</div>
+
+  <div class="cards">
+    <div class="card"><div class="k">总内存</div><div class="v">2.0 GB</div></div>
+    <div class="card"><div class="k">可用内存</div><div class="v">1.18 → 1.21 GB</div><div class="n">+22 MB 立即可用</div></div>
+    <div class="card"><div class="k">本次停用</div><div class="v">3 个包</div><div class="n">释放常驻 38 MB</div></div>
+    <div class="card"><div class="k">系统参数调优</div><div class="v">6 项</div></div>
+  </div>
+
+  <h2>一、检查结论</h2>
+  <p style="font-size:13px;margin:8px 0;">盒子当前共 <strong>63 个已装包</strong>（系统 + 预装），常驻应用进程 <strong>28 个</strong>。其中有一批「没有桌面入口、用户永远不会主动打开、却在开机后自动常驻服务」的包占据了大量内存，这是内存偏紧的主因。</p>
+  <ul>
+    <li>内存第一大户是 <code>com.huawei.himovceie</code>（影视仓 / DLNA 接收，含 Chromium 内核），检查时处于前台活动状态，峰值 125 MB —— 已按你的选择保留。</li>
+    <li>第二是 <code>com.skyworthdigital.mediarender</code>（投屏接收端），注册了 14 个开机广播，常驻 45 MB —— 已按你的选择保留。</li>
+    <li>本次真正需要处理的只有 3 个包，其余 15 个在早前的调试中已被停用。</li>
+    <li>另外发现开机引导 <code>com.android.provision</code> 完成后进程并未退出，白占 19 MB，已释放。</li>
+  </ul>
+
+  <h2>二、本次停用的应用（均为无桌面入口的后台组件）</h2>
+  <table>
+    <thead><tr><th style="width:42%">包名</th><th style="width:24%">作用</th><th style="width:14%">常驻内存</th><th style="width:20%">停用后有感知吗</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="mono">com.skyworthdigital.voiceassistant</td>
+        <td>遥控器语音识别服务</td>
+        <td>17.8 MB</td>
+        <td><span class="tag t-off">仅语音遥控失效</span></td>
+      </tr>
+      <tr>
+        <td class="mono">com.skyworthdigital.skymediacenter</td>
+        <td>本地视频 / 海报墙</td>
+        <td>14.2 MB</td>
+        <td><span class="tag t-off">无</span></td>
+      </tr>
+      <tr>
+        <td class="mono">com.skyworthdigital.autotest</td>
+        <td>工厂出厂自检</td>
+        <td>6.5 MB</td>
+        <td><span class="tag t-off">无</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:#5f5e5a;margin:8px 0;">验证结果：这三个包都不带 LEANBACK / LAUNCHER 入口，桌面上没有图标，停用后桌面列表、定时启动 App、CleanYourTV 均不受影响。</p>
+
+  <h2>三、系统参数调优（无风险，即时生效）</h2>
+  <table>
+    <thead><tr><th style="width:40%">参数</th><th style="width:22%">原值</th><th style="width:22%">现值</th><th style="width:16%">效果</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">window_animation_scale</td><td>1.0</td><td>0.5</td><td><span class="tag t-tune">窗口切换更快</span></td></tr>
+      <tr><td class="mono">transition_animation_scale</td><td>1.0</td><td>0.5</td><td><span class="tag t-tune">界面过渡更跟手</span></td></tr>
+      <tr><td class="mono">animator_duration_scale</td><td>1.0</td><td>0.5</td><td><span class="tag t-tune">动画整体减半</span></td></tr>
+      <tr><td class="mono">heads_up_notifications_enabled</td><td>1</td><td>0</td><td><span class="tag t-tune">不弹悬浮通知</span></td></tr>
+      <tr><td class="mono">assisted_gps_enabled</td><td>1</td><td>0</td><td><span class="tag t-tune">电视无 GPS，无影响</span></td></tr>
+      <tr><td class="mono">wifi_wakeup_enabled</td><td>1</td><td>0</td><td><span class="tag t-tune">减少后台扫描</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>四、按你的选择保留的功能</h2>
+  <table>
+    <thead><tr><th style="width:42%">包名</th><th style="width:32%">功能</th><th style="width:26%">占用</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">com.huawei.himovceie</td><td>影视仓 / 内容聚合 + DLNA 接收</td><td><span class="tag t-keep">保留 · 91~125 MB</span></td></tr>
+      <tr><td class="mono">com.skyworthdigital.mediarender</td><td>乐播 / 华为投屏接收端</td><td><span class="tag t-keep">保留 · 45 MB</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>五、明确未处理的部分</h2>
+  <ul>
+    <li><strong>你自己安装的第三方应用</strong>：可可影视 <code>com.kkys.tv1</code> 等，一个未动。</li>
+    <li><strong>核心桌面链路</strong>：CleanYourTV（桌面）与「定时启动」App，这两个是开机自动跳转方案的基础，未动。</li>
+    <li><strong>输入 / 设置 / 蓝牙</strong>：搜狗输入法、系统设置、蓝牙服务，动了会导致没法操作，保留。其中蓝牙设置服务与遥控器配对相关，也保留。</li>
+  </ul>
+
+  <h2>六、回滚方式</h2>
+  <p style="font-size:13px;margin:8px 0;">所有操作用的都是「停用」（<code>pm disable-user</code>），不是卸载，数据和 APK 都还在。工作区已生成一键回滚脚本：</p>
+  <pre>bash restore-presetapps.sh</pre>
+  <p style="font-size:13px;margin:10px 0 6px;">只恢复某一个包，直接指定包名即可：</p>
+  <pre>adb connect 192.168.1.100:5555
+adb shell pm enable com.skyworthdigital.voiceassistant</pre>
+  <div class="warn">
+    <strong>唯一需要小心的一条：</strong>如果哪天要恢复官方桌面 <code>com.skyworthdigital.sky2dlauncherv4</code>，必须先 <code>pm enable</code> 再 <code>reboot</code>，顺序颠倒会卡在开机画面。
+  </div>
+
+  <h2>七、优化后的常驻进程（Top 12）</h2>
+  <table>
+    <thead><tr><th style="width:46%">进程</th><th style="width:18%">PSS</th><th style="width:36%">说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">com.huawei.himovceie</td><td>125 MB</td><td>影视仓（选择保留，当时在前台）</td></tr>
+      <tr><td class="mono">system (system_server)</td><td>114 MB</td><td>安卓框架，不可动</td></tr>
+      <tr><td class="mono">com.skyworthdigital.mediarender</td><td>45 MB</td><td>投屏接收（选择保留）</td></tr>
+      <tr><td class="mono">com.android.systemui</td><td>39 MB</td><td>系统界面，不可动</td></tr>
+      <tr><td class="mono">com.sohu.inputmethod.sogou.tv</td><td>27 MB</td><td>输入法，保留</td></tr>
+      <tr><td class="mono">zygote</td><td>25 MB</td><td>进程孵化器</td></tr>
+      <tr><td class="mono">com.ktcp.launcher</td><td>21 MB</td><td>CleanYourTV 桌面（我们的）</td></tr>
+      <tr><td class="mono">surfaceflinger</td><td>16 MB</td><td>屏幕合成</td></tr>
+      <tr><td class="mono">com.android.bluetooth</td><td>15 MB</td><td>蓝牙，保留</td></tr>
+      <tr><td class="mono">com.android.noticewidget</td><td>14 MB</td><td>系统通知组件，保留</td></tr>
+      <tr><td class="mono">com.ktcp.launcher.autostart</td><td>13 MB</td><td>定时启动 App（我们的）</td></tr>
+      <tr><td class="mono">com.skyworthdigital.settings</td><td>13 MB</td><td>厂商设置，保留</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:#5f5e5a;margin:10px 0;">已消失的条目：语音助手 17.8 MB、媒体中心 14.2 MB、开机引导 19.4 MB、工厂自检 6.5 MB。</p>
+
+  <div class="note">
+    <strong>关于重启：</strong>按你的选择这次没有重启。当前释放的内存已经立即可用，剩余效果（停用包不再开机自启、新的动画参数应用到所有界面）会在下一次开机后完全体现。建议下次开机后再看一眼可用内存。
+  </div>
+
+  <div class="foot">生成时间 2026-10-24 · 操作全程可通过 restore-presetapps.sh 回滚 · 采集数据存于 audit/ 目录</div>
+
+</div>
+</body>
+</html>

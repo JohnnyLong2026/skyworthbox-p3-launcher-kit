@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Android 11+ package visibility: without this the app picker would only see a handful of apps. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/banner"
+        android:theme="@style/Theme.TvAutoStart"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true">
+
+        <!-- Configuration screen. Opened from the home screen; never takes over HOME.
+             One entry only: with both LEANBACK and LAUNCHER declared, Aerial's app scan lists this
+             twice on the home row (the TV launcher only ever needs the leanback one). -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true"
+            android:excludeFromRecents="true"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|uiMode"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Translucent reminder overlay that floats above the home screen. -->
+        <activity
+            android:name=".ReminderActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TvAutoStart.Reminder"
+            android:launchMode="singleTop"
+            android:stateNotNeeded="true"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|uiMode"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".AppPickerActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|uiMode"
+            android:screenOrientation="landscape" />
+
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Keeps the process foreground-legal so the overlay is allowed to launch after boot.
+             Exported so the home screen can hand over the boot moment on firmwares that refuse to
+             auto-start anything but the home screen. Every other route - launches from this app,
+             and BOOT_COMPLETED where it is allowed - goes through the same service. -->
+        <service
+            android:name=".ReminderService"
+            android:exported="true" />
+    </application>
+
+</manifest>

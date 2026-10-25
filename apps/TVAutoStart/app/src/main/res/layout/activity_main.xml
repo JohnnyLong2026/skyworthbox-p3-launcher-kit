@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Settings, in the tvOS idiom: one left-aligned column on a near-black canvas, a big white mark
+  and title at the top, then plain labels above the controls they name. Nothing is boxed in a
+  window: the controls are the only raised surfaces.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/window_background"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingStart="52dp"
+        android:paddingTop="26dp"
+        android:paddingEnd="52dp"
+        android:paddingBottom="22dp">
+
+        <!-- Mark + wordmark. The mark is the same drawing as the tile on the home screen. -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="82dp"
+                android:layout_height="82dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_alarm" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:includeFontPadding="false"
+                android:letterSpacing="0.04"
+                android:text="@string/title"
+                android:textColor="@color/text_primary"
+                android:textSize="38sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:letterSpacing="0.16"
+            android:text="@string/delay_label"
+            android:textColor="@color/text_label"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/delay_5"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginEnd="14dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="5 秒"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/delay_10"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginEnd="14dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="10 秒"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/delay_15"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="15 秒"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:letterSpacing="0.16"
+            android:text="@string/target_label"
+            android:textColor="@color/text_label"
+            android:textSize="13sp" />
+
+        <!-- Reads as a tvOS disclosure row: the chosen app, then a chevron. -->
+        <Button
+            android:id="@+id/btn_pick"
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_row"
+            android:ellipsize="end"
+            android:focusable="true"
+            android:gravity="center_vertical|start"
+            android:paddingStart="26dp"
+            android:paddingEnd="26dp"
+            android:singleLine="true"
+            android:stateListAnimator="@animator/focus_lift"
+            android:text="@string/pick_app"
+            android:textColor="@drawable/text_pill"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginEnd="14dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="@string/save"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_reset"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginEnd="14dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="@string/reset"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btn_preview"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_pill"
+                android:focusable="true"
+                android:stateListAnimator="@animator/focus_lift"
+                android:text="@string/preview"
+                android:textColor="@drawable/text_pill"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
+
+        <!-- Status sits in the footer, as tvOS puts the current value under the list. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="12dp"
+                android:alpha="0.55"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_alarm" />
+
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/status_none"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

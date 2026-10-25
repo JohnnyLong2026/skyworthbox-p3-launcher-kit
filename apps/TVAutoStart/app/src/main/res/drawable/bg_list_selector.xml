@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Drawn by the ListView behind the selected row. ListView keeps focus itself, so the rows never
+  see state_focused: the bar has to be a listSelector, as on tvOS.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#4DFFFFFF" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item android:state_window_focused="false">
+        <shape android:shape="rectangle">
+            <solid android:color="#1FFFFFFF" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#1FFFFFFF" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</selector>

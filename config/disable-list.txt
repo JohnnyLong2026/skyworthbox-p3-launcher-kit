@@ -1,0 +1,15 @@
+package:com.skyworthdigital.softap
+package:com.skyworthdigital.skycleandisk
+package:com.softwinner.dragonbox
+package:com.nanosic.www.otaservice
+package:com.jd.smartservicetwo
+package:com.skyworthdigital.miracast
+package:com.skyworthdigital.remotedebug
+package:com.skyworthdigital.sky2dlauncherv4
+package:com.skyworthdigital.ott.guide
+package:com.skyworthdigital.smarthome
+package:com.softwinner.agingdragonbox
+package:com.mipt.store
+package:com.skyworthdigital.skywechatclient
+package:com.skyworthdigital.optimization
+package:com.tianci.ad

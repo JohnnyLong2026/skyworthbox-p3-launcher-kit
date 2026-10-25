@@ -1,0 +1,96 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index 10a1b73..a4b280b 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -12,7 +12,12 @@ android {
+     compileSdk = 36
+ 
+     defaultConfig {
+-        applicationId = "app.orchard.tv"
++        // Skyworth Xiaopai P3 (cupid_p2): the firmware only lets packages whose id starts with a
++        // factory-registered prefix become HOME ("allow/block home apk" in ActivityManager).
++        // com.ktcp.launcher is one of those prefixes and is not installed, so Aerial takes over
++        // Home under it. The Java namespace above stays app.orchard.tv, exactly like the
++        // namespace/applicationId split the project already relies on.
++        applicationId = "com.ktcp.launcher.aerial"
+         // Android 5.0. Compose 1.10 and later need 6.0, so the Compose BOM below stays on 1.9.
+         minSdk = 21
+         targetSdk = 34
+diff --git a/app/src/main/java/app/orchard/tv/MainActivity.kt b/app/src/main/java/app/orchard/tv/MainActivity.kt
+index 3ee53d0..61913b0 100644
+--- a/app/src/main/java/app/orchard/tv/MainActivity.kt
++++ b/app/src/main/java/app/orchard/tv/MainActivity.kt
+@@ -60,6 +60,7 @@ import app.orchard.tv.ui.theme.FontWarmup
+ import app.orchard.tv.ui.theme.canvasDensity
+ import app.orchard.tv.settings.AerialSettings
+ import app.orchard.tv.wallpaper.Wallpapers
++import app.orchard.tv.system.AutostartBridge
+ import app.orchard.tv.system.DiagLog
+ import app.orchard.tv.system.FrameStats
+ import app.orchard.tv.wallpaper.ScreensaverMode
+@@ -240,6 +241,9 @@ class MainActivity : ComponentActivity() {
+             }
+         }
+         if (fresh && firstStartSinceBoot()) openBootSource("boot")
++        // Let the timed start this box already had survive the move to Aerial: tell its helper app
++        // this is a fresh boot, once (see AutostartBridge). Nothing happens if it is not installed.
++        if (fresh) AutostartBridge.armOncePerBoot(this)
+         if (intent.getBooleanExtra(EXTRA_WOKE, false)) openBootSource("brought back on wake")
+         if (fromLocked) {
+             // This window already went through onStart and onResume while locked (both returned
+diff --git a/app/src/main/java/app/orchard/tv/system/AutostartBridge.kt b/app/src/main/java/app/orchard/tv/system/AutostartBridge.kt
+new file mode 100644
+index 0000000..26953c3
+--- /dev/null
++++ b/app/src/main/java/app/orchard/tv/system/AutostartBridge.kt
+@@ -0,0 +1,50 @@
++package app.orchard.tv.system
++
++import android.content.Context
++import android.content.Intent
++import android.os.Build
++import android.os.SystemClock
++import android.provider.Settings
++
++/**
++ * Hands the boot moment to the box's auto-start helper, once per boot.
++ *
++ * Skyworth Xiaopai P3 (cupid_p2, Android 10). Before Aerial, the owner's timed start lived on the
++ * CleanYourTV home screen, which has a hook that opens whatever app you set N seconds after boot.
++ * This firmware blocks every auto-start route a normal app has: BOOT_COMPLETED receivers of third
++ * party packages are dropped with "Block auto start app from broadcast", so the helper app
++ * (com.ktcp.launcher.autostart) can never wake itself at power-on.
++ *
++ * Home is different: it runs anyway as soon as the TV comes up, so it tells the helper "this is a
++ * fresh boot" itself. It starts the helper's service explicitly - an explicit start from the
++ * foreground is the one form this firmware lets through; a broadcast would hit the same guard.
++ *
++ * The helper keeps everything else: which app, 5/10/15 seconds, the cancel-on-any-key overlay. It
++ * is the one that decides whether anything is configured.
++ */
++object AutostartBridge {
++
++    private const val HELPER = "com.ktcp.launcher.autostart"
++    // The helper installs under a factory-allowlisted package id while its Java namespace stays
++    // com.skyworthdigital.autostart, so the component name is a mix of the two - not HELPER + ".x".
++    private const val SERVICE = "com.skyworthdigital.autostart.ReminderService"
++    private const val ACTION_ARM = "$HELPER.ACTION_ARM"
++
++    /**
++     * No-op unless this is Home's first real start since power-on: same window and same
++     * BOOT_COUNT bookkeeping as MainActivity.openBootSource, kept apart so neither of them can
++     * consume the other's turn.
++     */
++    fun armOncePerBoot(context: Context) {
++        if (SystemClock.elapsedRealtime() > 3 * 60 * 1000L) return
++        if (Build.VERSION.SDK_INT >= 24) {
++            val boot = Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
++            val prefs = context.getSharedPreferences("system", Context.MODE_PRIVATE)
++            if (boot < 0 || prefs.getInt("autostart_bridged_boot", -2) == boot) return
++            prefs.edit().putInt("autostart_bridged_boot", boot).apply()
++        }
++        val intent = Intent(ACTION_ARM).setClassName(HELPER, SERVICE)
++        runCatching { context.startForegroundService(intent) }
++            .onFailure { DiagLog.i("auto-start helper not reachable: $it") }
++    }
++}

@@ -1,0 +1,22 @@
+# Gradle / Android 构建产物
+*.apk.tmp
+build/
+.gradle/
+local.properties
+.cxx/
+*.iml
+.idea/
+
+# 盒子端临时文件
+backup/*.png
+backup/*.txt
+!config/*.txt
+
+# Python
+__pycache__/
+venv/
+*.pyc
+
+# 系统
+.DS_Store
+Thumbs.db

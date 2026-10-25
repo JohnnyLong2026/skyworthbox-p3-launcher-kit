@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创维小湃 P3 · 硬件信息报告</title>
+<style>
+  :root{
+    --bg:#ffffff; --surface:#f7f7f5; --border:rgba(0,0,0,0.12);
+    --text:#1f1f1d; --text2:#5f5e5a; --text3:#8a8983;
+    --info:#185fa5; --warn:#854f0b; --warnbg:#faeeda; --ok:#3b6d11;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:40px 24px; background:var(--surface);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px; margin:0 auto;}
+  .card{
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:12px; padding:24px 28px; margin-bottom:16px;
+  }
+  h1{font-size:20px; font-weight:500; margin:0 0 4px;}
+  h2{font-size:14px; font-weight:500; margin:0 0 14px; padding-bottom:10px; border-bottom:1px solid var(--border);}
+  .sub{font-size:13px; color:var(--text2); margin:0;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .metric{background:var(--surface); border-radius:8px; padding:14px 16px;}
+  .metric .lbl{font-size:12px; color:var(--text2);}
+  .metric .val{font-size:24px; font-weight:500; line-height:1.35;}
+  .metric .note{font-size:12px; color:var(--text3);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top;}
+  th{width:150px; color:var(--text2); font-weight:400; background:var(--surface);}
+  td{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace; font-size:12.5px;}
+  tr:last-child th,tr:last-child td{border-bottom:none;}
+  .note-box{background:var(--warnbg); border-radius:8px; padding:14px 18px; font-size:13px; color:var(--warn);}
+  .note-box b{font-weight:500;}
+  .note-box p{margin:0 0 8px;}
+  .note-box p:last-child{margin:0;}
+  ul{margin:8px 0 0; padding-left:20px; font-size:13px; color:var(--text2);}
+  li{margin-bottom:4px;}
+  code{background:var(--surface); padding:1px 5px; border-radius:4px; font-size:12px;}
+  .foot{font-size:12px; color:var(--text3); text-align:center; padding:8px 0 0;}
+  @media(max-width:640px){.grid4{grid-template-columns:repeat(2,1fr);}.grid3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h1>创维小湃 P3 · 硬件信息报告</h1>
+    <p class="sub">设备地址 192.168.1.100 · 采集方式 ADB 调试 · 采集时间 2026-10-24 11:52</p>
+  </div>
+
+  <div class="card">
+    <div class="grid4">
+      <div class="metric"><div class="lbl">处理器</div><div class="val">H616</div><div class="note">全志 · 四核 A53</div></div>
+      <div class="metric"><div class="lbl">最高主频</div><div class="val">1.51</div><div class="note">GHz</div></div>
+      <div class="metric"><div class="lbl">运行内存</div><div class="val">2</div><div class="note">GB · 可用 1.93 GB</div></div>
+      <div class="metric"><div class="lbl">机身存储</div><div class="val">16</div><div class="note">GB eMMC</div></div>
+    </div>
+    <div class="grid3">
+      <div class="metric"><div class="lbl">图形处理器</div><div class="val" style="font-size:16px;">Mali-G31</div><div class="note">OpenGL ES 3.2</div></div>
+      <div class="metric"><div class="lbl">系统版本</div><div class="val" style="font-size:16px;">Android 10</div><div class="note">内核 4.9.170</div></div>
+      <div class="metric"><div class="lbl">视频输出</div><div class="val" style="font-size:16px;">1920×1080</div><div class="note">1080p · 50 Hz</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>主板与芯片</h2>
+    <table>
+      <tr><th>SoC</th><td>Allwinner 全志 H616（平台代号 sun50iw9p1 / cupid）</td></tr>
+      <tr><th>CPU</th><td>4 × ARM Cortex-A53（CPU part 0xd03），最高 1512000 kHz</td></tr>
+      <tr><th>指令集</th><td>ARMv8（32 位模式运行，abi = armeabi-v7a）</td></tr>
+      <tr><th>GPU</th><td>ARM Mali-G31 r0p0（ID 0x7093），OpenGL ES 3.2</td></tr>
+      <tr><th>内核</th><td>Linux 4.9.170 SMP PREEMPT（2022-01-17 编译，HKT）</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>设备标识</h2>
+    <table>
+      <tr><th>品牌 / 厂商</th><td>skyworthbox / SkyworthDigitalRT（创维数字）</td></tr>
+      <tr><th>机型</th><td>Q5001</td></tr>
+      <tr><th>设备代号</th><td>cupid-p2（产品名 cupid_p2，板型 exdroid）</td></tr>
+      <tr><th>序列号</th><td class="mono">（已隐去 · 设备唯一标识）</td></tr>
+      <tr><th>固件版本</th><td>cupid_p2-userdebug 10 QP1A.191105.004 eng.Androi.20220117.163650</td></tr>
+      <tr><th>安全补丁</th><td>2019-12-05</td></tr>
+      <tr><th>时区</th><td>Asia/Shanghai</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>存储</h2>
+    <table>
+      <tr><th>eMMC 型号</th><td>AJTD4R（15.6 GB 实际容量 / 16 GB 标称）</td></tr>
+      <tr><th>用户可用</th><td>12 GB 分区，已用 4.1 GB，剩余 7.5 GB（36%）</td></tr>
+      <tr><th>缓存分区</th><td>740 MB（mmcblk0p7）</td></tr>
+      <tr><th>加密状态</th><td>unsupported（未启用存储加密）</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>网络与无线</h2>
+    <table>
+      <tr><th>有线网口</th><td>eth0 · 192.168.1.x/24 · MAC <span class="mono">00:11:22:33:44:55</span>（示意）</td></tr>
+      <tr><th>网口速率</th><td>100 Mbps 全双工（百兆，非千兆）</td></tr>
+      <tr><th>Wi-Fi</th><td>wlan0 · MAC <span class="mono">00:11:22:33:44:66</span>（示意，未连接）</td></tr>
+      <tr><th>Wi-Fi Direct</th><td>p2p0 · MAC <span class="mono">00:11:22:33:44:77</span>（示意）</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>视频解码能力</h2>
+    <table>
+      <tr><th>硬解格式</th><td>H.265/HEVC、H.264/AVC、VP9、VP8、AVS、MPEG1/2/4、VC-1、Xvid、DivX、MJPEG、H.263、Sorenson H.263</td></tr>
+      <tr><th>安全解码</th><td>支持 OMX.allwinner.video.decoder.avc.secure（DRM 安全通道）</td></tr>
+      <tr><th>H.265 性能</th><td>1080p 实测 59–286 fps；最高支持 4096×2048（45–75 fps）</td></tr>
+      <tr><th>H.264 性能</th><td>1080p 实测 56 fps；最高支持 4096×2048（25–35 fps）</td></tr>
+      <tr><th>硬编码</th><td>仅 H.264 与 MJPEG</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>运行状态（采集时）</h2>
+    <table>
+      <tr><th>内存</th><td>总计 2,020,356 KB；空闲 549 MB；可用 1,084 MB</td></tr>
+      <tr><th>负载</th><td>0.54 / 0.72 / 0.35（1/5/15 分钟）</td></tr>
+      <tr><th>SoC 温度</th><td>约 32.4 °C</td></tr>
+      <tr><th>运行时长</th><td>3 分钟</td></tr>
+      <tr><th>显示</th><td>1920×1080 @ 50 Hz，DPI 320</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="note-box">
+      <p><b>两点值得注意</b></p>
+      <p>1. 网口是百兆（100 Mbps）而非千兆。SoC 支持 4K 硬解，但通过网线播放高码率 4K 原盘、或从 NAS 拉取大文件时，实际带宽上限约 11 MB/s，会成为瓶颈。建议这类场景改用 Wi-Fi 5G 频段，或先把片源拷到本地存储。</p>
+      <p>2. 系统是 32 位（armeabi-v7a）。CPU 本身是 64 位 ARMv8，但固件只编译了 32 位用户空间，因此仅提供 64 位 native 库的应用无法安装运行。</p>
+      <ul>
+        <li>系统分区 <code>/</code>、<code>/vendor</code>、<code>/product</code> 显示 100% 属正常现象——它们是只读的 dm-verity 镜像，容量由分区表固定，不代表存储已满。</li>
+        <li>安全补丁停留在 2019-12-05，是 Android 10 该批次固件的原始水平，后续未更新。</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="foot">数据通过 ADB 实时读取自设备 192.168.1.100:5555</p>
+</div>
+</body>
+</html>
