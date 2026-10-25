@@ -238,16 +238,16 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 
 ## 备份到 GitHub
 
+仓库在 <https://github.com/JohnnyLong2026/skyworthbox-p3-launcher-kit>。
+
 ```bash
 cd scripts
-GITHUB_TOKEN=ghp_你的token ./50-backup-github.sh           # 私有仓库，一键搞定
-GITHUB_TOKEN=ghp_你的token ./50-backup-github.sh --public  # 公开
-./50-backup-github.sh --ssh                                 # 或走 SSH（公钥要先登记）
-./50-backup-github.sh --zip                                 # 或只打包，网页手动传
+./50-backup-github.sh          # 走 SSH 推送，免密
+./50-backup-github.sh --zip    # 或只打包成 zip，网页手动传
 ```
 
-在默认 `git push` 不通的网络环境下（代理 502 / 直连超时），脚本会走 REST API 的
-`blob → tree → commit → ref`，效果和 push 一样，还能增量追加提交。
+要用你自己的仓库，改脚本里的 `REPO_NAME` 和推送地址即可（现在写的是本仓库的名字）。
+SSH 公钥只登记一次就一直有效；没登记时脚本会把公钥打出来并告诉你去哪儿加。
 完整流程见 [docs/07-备份到GitHub.md](docs/07-备份到GitHub.md)。
 
 ---
