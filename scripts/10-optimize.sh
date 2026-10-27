@@ -35,7 +35,9 @@ WITH_LAUNCHER=0
 
 # ---- 1. 停用清单里的应用 ----
 info "开始停用（清单：$LIST）"
-while read -r p; do
+# 用 fd 3 读清单：循环体里的 adb 会吃掉 stdin，直接用 < "$LIST" 的话
+# 第一次迭代之后 stdin 就被 adb 抢光了，只读到第一行（表现出来是"只停用了第一个包"）
+while read -r p <&3; do
   p="$(echo "$p" | tr -d '\r' | sed 's/package://' | xargs)"
   [ -z "$p" ] && continue
 
@@ -58,7 +60,7 @@ while read -r p; do
     continue
   fi
   sh "pm disable-user --user 0 $p" | sed 's/^/  /'
-done < "$LIST"
+done 3< "$LIST"
 
 # ---- 2. 系统参数 ----
 info "调整系统参数"

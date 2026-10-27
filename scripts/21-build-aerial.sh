@@ -51,13 +51,18 @@ info "安装 $APK"
 "$ADB" -s "$BOX" install -r "$APK" | tr -d '\r' | sed 's/^/  /'
 sh "monkey -p $AERIAL_PKG -c android.intent.category.LAUNCHER 1" >/dev/null 2>&1
 
-# 设 HOME 之前先确认它能被解析（白名单是否放行）
-if ! sh "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME" | grep -q "$AERIAL_PKG"; then
-  die "白名单没放行 $AERIAL_PKG。确认 applicationId 是否真的改成了 com.ktcp.launcher*"
-fi
-
+# 白名单是否放行：先设再验。
+# 不能"设之前先看 resolve 里有没有 Aerial"——出厂重置后官方桌面和 Aerial 并存，
+# 系统还没默认时 resolve 返回的是 com.android.internal.app.ResolverActivity（选择器），
+# 里面不含任何包名，那样会误报成"白名单没放行"。设完之后 resolve 才会回到具体组件。
 info "设为默认桌面"
 sh "cmd package set-home-activity --user 0 $AERIAL_HOME" | sed 's/^/  /'
+
+if ! sh "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME" | grep -q "$AERIAL_PKG"; then
+  die "设完 HOME 仍不是 $AERIAL_PKG。多半是白名单没放行（applicationId 要以 com.ktcp.launcher 开头）；
+    查 logcat 关键字：'allow home apk' / 'block home apk'"
+fi
+
 sh "pm disable-user --user 0 $OFFICIAL_LAUNCHER" | sed 's/^/  /'
 echo "  当前 HOME：$(home_now)"
 
