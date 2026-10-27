@@ -1,5 +1,39 @@
 # 更新记录
 
+## v1.7（2026-10-27）4 个顽固包改走卸载，云端再也恢复不了
+
+### 根因追到底了
+
+恢复启用不是本地重扫，是 `com.skyworthdigital.skycommonpropertymanager`（uid 1000）
+开机约 60 秒后联网拉厂商「系统控制列表」，逐个 `setApplicationEnabledSetting(ENABLED)`。
+调用栈见 `config/stubborn-list.txt`。
+
+### 三条路试过两条是死路
+
+- 停 `com.skyworthdigital.upgrade`（原以为它是元凶）→ 无效，它自己也被恢复，白丢 OTA
+- 写固件自带的 `settings system` 黑白名单（`startupblacklist` / `backgroundblacklist`）
+  → 写入成功，但开机就被云端列表覆盖回原值
+- 改 `/etc/hosts` 屏蔽域名 → 做不到（uid 2000、`/system` ro）
+
+### 采用：`pm uninstall -k --user 0`
+
+包对 user 0 不存在时，云端那步直接抛 `Unknown package`，恢复动作失效。
+只卸 4 个基本无害的：`ottstatsv2`（埋点）、`ott.advert.app`（广告）、
+`skyappupdate`（应用更新）、`logcollector`（日志）。语音助手、媒体中心保留停用
+（卸了会影响语音遥控和 U 盘播放）。
+
+实测（重启后 136 秒，已过恢复窗口）：这 4 个**依然不存在**，另 2 个被恢复。
+
+### 新增 / 改动
+
+- `config/uninstall-list.txt` + `scripts/15-uninstall.sh`：幂等卸载，卸前把 APK
+  复制到盒子 `/sdcard/p3-backup/`（PC 侧 `backup/system-apk/` 还有一份 + 还原说明）
+- `40-restore.sh --apps`：新增 `restore_uninstalled()`，用 `pm install-existing` 装回
+- `disable-list.txt`：这 4 个移出（22 个），注释指向卸载清单
+- `90-check-status.sh`：新增「3b. 已卸载的包」，卸没卸掉一眼看到
+- 屏保注意点更新：广告包卸了以后固件仍写回那个组件，等于**没有屏保**，
+  每次开机更要记得跑 `10-optimize.sh` 的 `restore_dream`
+
 ## v1.6（2026-10-27）固件会把包恢复启用：加看门狗自动补回，桌面跳转延迟 5 秒
 
 ### 桌面不再一冒头就跳走

@@ -28,6 +28,22 @@ echo "===== 3. 停用包（$(S pm list packages -d | wc -l) 个）====="
 S pm list packages -d | sed 's/package:/  /' | sort
 
 echo
+echo "===== 3b. 已卸载的包（对 user 0 不存在，固件恢复不了）====="
+# 卸掉的包不会出现在 pm list packages 里，单独列一下，免得以为"没生效"
+# 循环体里调 adb 会抢 stdin，所以先落文件再用 fd 3 读（老坑）
+S pm list packages > /tmp/pkgbox.txt 2>/dev/null
+if [ -f config/uninstall-list.txt ]; then
+  grep -v '^[[:space:]]*#' config/uninstall-list.txt | sed 's/#.*//; s/^package://' | tr -d '\r' | grep -v '^$' > /tmp/uninst.txt
+  while read -r p <&3; do
+    if grep -qx "package:$p" /tmp/pkgbox.txt; then
+      echo "  $p  ← 还在（未卸载或已被装回）"
+    else
+      echo "  $p  ✓ 已卸载"
+    fi
+  done 3< /tmp/uninst.txt
+fi
+
+echo
 echo "===== 4. 正在运行的应用进程（剩下的就是开机后常驻的）====="
 # 一次 ps 拿全表，再用 fd 3 喂给 while：循环体里的 adb 会抢 stdin，直接 < file 会只读到第一行
 S ps -A -o PID,USER,NAME > /tmp/psbox.txt 2>/dev/null

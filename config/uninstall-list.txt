@@ -1,0 +1,26 @@
+# 创维小湃 P3（Q5001 / cupid-p2）卸载清单
+# 用法：./scripts/15-uninstall.sh（还原：./scripts/40-restore.sh --apps）
+#
+# 为什么这批要卸载而不是停用：
+#   固件里的 com.skyworthdigital.skycommonpropertymanager 每次开机约 60 秒后，
+#   会联网拉一份厂商的「系统控制列表」，然后逐个调 setApplicationEnabledSetting(ENABLED)
+#   把我们停用的包恢复启用（详见 config/stubborn-list.txt 里的调用栈）。
+#   包一旦对 user 0 不存在，它那一步就抛 Unknown package，恢复动作自然失效。
+#   实测：卸载后重启，这 4 个依然是"不存在"状态，而保留停用的 2 个会被恢复。
+#
+# 卸载只针对 user 0，APK 仍留在 /system 或 /sdcard/p3-backup/ 里，随时能装回：
+#   pm install-existing <包名>          ← 装回系统自带的那份（秒回）
+#   adb install -r -d -k <备份.apk>     ← 想回到卸载前的版本时用
+#
+# 15-uninstall.sh 在卸载前会把 APK 复制到盒子的 /sdcard/p3-backup/，
+# PC 侧也存了一份在 backup/system-apk/（含 README.txt 还原说明）。
+
+# ① 完全无害：埋点、广告、应用更新、日志。卸了不影响任何日常功能
+package:com.skyworthdigital.ottstatsv2          # 数据采集：观看行为上报
+package:com.skyworthdigital.ott.advert.app      # 小湃通广告：抢屏保的就是它
+package:com.skyworthdigital.skyappupdate        # 应用更新（系统 OTA 由 upgrade 管，不受影响）
+package:com.skyworthdigital.logcollector        # 日志收集上传
+
+# ② 有功能代价，默认不卸（留在 disable-list.txt 里停用即可，被恢复了看门狗会补）：
+#   com.skyworthdigital.voiceassistant   卸了语音遥控失效
+#   com.skyworthdigital.skymediacenter   卸了 USB / 本地媒体播放受影响

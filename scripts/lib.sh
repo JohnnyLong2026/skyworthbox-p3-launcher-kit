@@ -82,6 +82,9 @@ AERIAL_HOME="$AERIAL_PKG/app.orchard.tv.MainActivity"
 AERIAL_DREAM="$AERIAL_PKG/app.orchard.tv.dream.AerialDream"
 # 出厂屏保：创维广告组件。每次开机固件都会把这个值写回 screensaver_components，
 # 所以换屏保不是一次性的，装完 Aerial / 每次重启后都要重设（见 restore_dream）。
+# 注意：广告包 ott.advert.app 已经在卸载清单里，这个组件其实不存在了 —— 固件仍然
+# 照写不误，结果就是"屏保指向一个不存在的服务"，等于没有屏保。所以每次开机后
+# 更要记得 restore_dream 把它改回 AerialDream。
 STOCK_DREAM="com.skyworthdigital.ott.advert.app/com.skyworthdigital.ott.advert.app.screensaver.ScreenSaverService"
 AUTOSTART_PKG="com.ktcp.launcher.autostart"
 AUTOSTART_SVC="com.skyworthdigital.autostart.ReminderService"
@@ -110,6 +113,24 @@ unsuspend_stubborn() {
   [ "$n" -eq 0 ] && echo "  没有处于 suspend 的包"
   return 0
 }
+
+# ---------- 卸载清单 ----------
+# 这几个包连停用都保不住：固件云端下发「系统控制列表」后会逐个恢复启用。
+# 唯一的解法是让包对 user 0 不存在 —— 云端那步 setApplicationEnabledSetting
+# 会抛 Unknown package。卸载前会把 APK 备份到 /sdcard/p3-backup/，随时可
+# pm install-existing 装回（40-restore.sh 的 --apps 会做这件事）。
+UNINSTALL_LIST="$REPO_ROOT/config/uninstall-list.txt"
+BOX_BACKUP_DIR="/sdcard/p3-backup"
+
+uninstall_packages() {
+  [ -f "$UNINSTALL_LIST" ] || return 0
+  # 和 disable-list 一样带 package: 前缀，这里先剥掉；行内 # 注释也要去掉
+  grep -v '^[[:space:]]*#' "$UNINSTALL_LIST" | sed 's/#.*//; s/^package://' | tr -d '\r' | xargs -n1 2>/dev/null | grep -v '^$'
+}
+
+# 包当前是否对 user 0 可见（卸载后为否）。
+# 用 -x 整行匹配：pm list packages 的参数是前缀匹配，会把 com.a 和 com.ab 混在一起。
+pkg_present() { sh "pm list packages" | grep -qx "package:$1"; }
 
 # ---------- 屏保 ----------
 # 固件在开机时会把 screensaver_components 写回广告组件，所以这不是一次性设置：

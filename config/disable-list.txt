@@ -1,6 +1,7 @@
 # 创维小湃 P3（Q5001 / cupid-p2）停用清单
 # 用法：./scripts/10-optimize.sh（还原：./scripts/40-restore.sh）
-# 全部是 disable-user 停用（不是卸载），随时能恢复。改完跑一次脚本即可，重复跑幂等。
+# 本清单全部是 disable-user 停用（不是卸载），随时能恢复。改完跑一次脚本即可，重复跑幂等。
+# 另有 config/uninstall-list.txt 走「卸载」——那份是停用保不住的包（云端会恢复）。
 #
 # 分四组，按"停了会失去什么"排的，照自己的需要取舍。
 
@@ -21,10 +22,9 @@ package:com.skyworthdigital.optimization
 package:com.tianci.ad
 
 # ② 开机后常驻的后台上报 / 广告 / 工厂测试 —— 停掉不影响任何日常功能
-package:com.skyworthdigital.ottstatsv2          # 数据采集：观看行为上报
-package:com.skyworthdigital.ott.advert.app      # 小湃通：广告推送，就是它每次开机把屏保抢回去
-package:com.skyworthdigital.skyappupdate        # 应用更新
-package:com.skyworthdigital.logcollector        # 日志收集上传
+# 注意：ottstatsv2 / ott.advert.app / skyappupdate / logcollector 这四个已经改走
+# 「卸载」了，见 config/uninstall-list.txt。原因是固件云端下发的控制列表会把它们
+# 反复恢复启用，停用保不住；卸载后包对 user 0 不存在，恢复动作直接失效。
 package:com.android.noticewidget                # 通知小部件
 package:com.skyworthdigital.autotest            # 工厂自动化测试
 package:com.hezi.remoteinstaller                # 应用安装：手机端推送安装（走 ADB 不需要）

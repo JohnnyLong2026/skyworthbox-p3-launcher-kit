@@ -13,6 +13,11 @@ backup/*.txt
 !config/*.txt
 backup/*.log
 
+# 卸载前备份的系统 APK：只在盒子的 /sdcard/p3-backup/ 和本地留着。
+# 不进公开仓库——是创维的版权文件，而且单个就有几 MB。
+# 还原说明（README.txt）照常提交。
+backup/system-apk/*.apk
+
 # Python
 __pycache__/
 venv/

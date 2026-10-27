@@ -74,7 +74,8 @@ Aerial 桌面、几秒后自动跳转直播软件的样子。**全程免 root、
 | 0 | **判断值不值得动** | 查 `ro.product.cpu.abi`、`getprop ro.serialno`、能否开 ADB | 64 位设备、有 ADB 就都能做 |
 | 1 | **开 ADB** | 设置 → 关于 → 连点版本号 → 开发者选项 → 网络调试 | 记下 IP，`adb connect IP:5555` |
 | 2 | **体检** | `./scripts/00-doctor.sh` | 先摸清跑了什么、能停什么，别一上来就删 |
-| 3 | **系统瘦身** | `./scripts/10-optimize.sh`：停 26 个常驻、调 6 项参数、换屏保、清缓存 | 只动系统应用，第三方一律不碰 |
+| 3 | **系统瘦身** | `./scripts/10-optimize.sh`：停 22 个常驻、调 6 项参数、换屏保、清缓存 | 只动系统应用，第三方一律不碰 |
+| 3b | **卸掉 4 个顽固包** | `./scripts/15-uninstall.sh`：卸 ottstatsv2 / 广告 / skyappupdate / logcollector | 先备份 APK，`40-restore.sh --apps` 随时装回 |
 | 4 | **换桌面** | 改 `applicationId` 成白名单前缀 → 编译 → 装 → `set-home-activity` | **整件事的核心，见下方"坑 1"** |
 | 5 | **开机自启** | 桌面首次启动时显式 `startForegroundService` 拉起自己的服务 | **固件拦一切第三方开机广播，见"坑 2"** |
 | 6 | **细节调优** | 固定天气城市、换掉广告屏保、统一 logo、把倒计时压到 9 秒 | 都是"不影响功能但影响体感"的部分 |
@@ -161,6 +162,7 @@ skyworth-p3-launcher-kit/
 │   ├── 01-setup-env.sh       环境自检
 │   ├── 00-doctor.sh          体检，输出一份现状报告（只读）
 │   ├── 10-optimize.sh        系统优化（停用清单、调参、换屏保、清垃圾）
+│   ├── 15-uninstall.sh       卸掉固件会反复恢复的 4 个包（先备份 APK，可装回）
 │   ├── 20-build-autostart.sh 编译安装「定时启动」
 │   ├── 21-build-aerial.sh    clone 上游 → 打补丁 → 编译 → 安装 → 设为 HOME
 │   ├── 11-grant-permissions.sh  给 Aerial 补齐权限（重装后必跑，否则只能当空壳用）
@@ -208,7 +210,9 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 ./scripts/11-grant-permissions.sh        # 装完 Aerial 补权限（重置/重装后必跑）
 ./scripts/20-build-autostart.sh --apk    # 只装定时启动
 ./scripts/30-set-autostart.sh --list     # 看看能跳哪些应用
-./scripts/10-optimize.sh                 # 只做系统优化
+./scripts/10-optimize.sh                 # 只做系统优化（停用）
+./scripts/15-uninstall.sh --dry-run      # 看看要卸哪几个（不动盒子）
+./scripts/15-uninstall.sh                # 卸掉 4 个停不住的包（先备份 APK，可装回）
 ```
 
 ### D. 重启后状态体检 / 自动补回
@@ -236,8 +240,8 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 | 事项 | 说明 |
 |---|---|
 | **别用 Aerial 的「检查更新」** | 它下载官方 `app.orchard.tv` 包，会装成第二个应用。升级就重跑 `21-build-aerial.sh` |
-| **屏保重启后会变回广告** | 固件每次开机把 `screensaver_components` 写回创维广告组件。跑 `./scripts/10-optimize.sh` 补回 |
-| **6 个包会被固件自动恢复** | 见下方"固件会把一部分包恢复启用"，不是脚本没跑成功 |
+| **屏保重启后会失效** | 固件每次开机把 `screensaver_components` 写回创维广告组件（该包已卸载，指向不存在的服务 = 没有屏保）。跑 `./scripts/10-optimize.sh` 补回 AerialDream |
+| **2 个包会被固件自动恢复** | 语音助手、媒体中心只停用不卸载，会被云端列表恢复；4 个已卸载的则不会。见下方"固件会把一部分包恢复启用" |
 | **编译必须带包名参数** | `./gradlew assembleRelease -PlauncherApplicationId=com.ktcp.launcher.autostart` |
 | **侧装后要清 stopped 态** | `monkey -p <pkg> -c android.intent.category.LAUNCHER 1`，脚本已包含 |
 | **盒子会休眠** | 休眠后 ADB 无响应，需要遥控器唤醒。不是脚本出错 |
@@ -246,28 +250,29 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 | **改设置页的"还原"是清空配置** | 不是关掉功能开关，点完就回到"未设置"状态 |
 | **Git Bash 环境** | adb daemon 每条命令结束会被清掉，脚本已每次重连；`adb pull` 要 `MSYS_NO_PATHCONV=1` |
 
-### 固件会把一部分包恢复启用
+### 固件会把一部分包恢复启用（其中 4 个已彻底解决）
 
-停用 26 个之后隔一阵子再看，会掉回 20 个。被恢复的是这 6 个：
-
-```
-com.skyworthdigital.ottstatsv2       数据采集
-com.skyworthdigital.ott.advert.app   小湃通（就是它抢屏保）
-com.skyworthdigital.skyappupdate     应用更新
-com.skyworthdigital.logcollector     日志收集
-com.skyworthdigital.voiceassistant   语音助手
-com.skyworthdigital.skymediacenter   媒体中心
-```
-
-共同点：都是 `/system/app` 下**带 data 分区更新版本**的包。logcat 里能看到它们被重新扫描：
+有 6 个包光靠停用保不住，隔一阵子就被恢复启用：
 
 ```
-PackageManager: Failed to scan /system/app/SkyOttstats-origin:
-  Package com.skyworthdigital.ottstatsv2 ... updated version 46220 better than this 46002
+com.skyworthdigital.ottstatsv2       数据采集          ← 已卸载，解决
+com.skyworthdigital.ott.advert.app   小湃通（抢屏保的）  ← 已卸载，解决
+com.skyworthdigital.skyappupdate     应用更新          ← 已卸载，解决
+com.skyworthdigital.logcollector     日志收集          ← 已卸载，解决
+com.skyworthdigital.voiceassistant   语音助手          ← 仍停用，会被恢复
+com.skyworthdigital.skymediacenter   媒体中心          ← 仍停用，会被恢复
 ```
 
-重新扫描过后，这几个包就回到启用态，屏保也随之被广告组件抢回。
-触发时机不确定（观察到一次在停用后约 15 分钟）。
+前 4 个改成 `pm uninstall -k --user 0` 后**重启验证依然不存在**，云端再也恢复不了
+（原理见下方"唯一能根治的办法"）；APK 备份在盒子的 `/sdcard/p3-backup/` 和仓库
+`/sdcard/p3-backup/`（本地也留了一份在 `backup/system-apk/`，因版权不进仓库），
+`./scripts/40-restore.sh --apps` 一条命令装回。
+
+后 2 个有功能代价（语音遥控、U 盘播放）所以保留停用，被恢复后由看门狗补
+（`60-watch-reboot.sh`），大约 30 秒内回到停用态。
+
+**元凶已查明**：是 `com.skyworthdigital.skycommonpropertymanager`（uid 1000）在搞，恢复动作
+是厂商**云端下发的「系统控制列表」**，不是本地扫描：
 
 **元凶已查明**：是 `com.skyworthdigital.skycommonpropertymanager`（uid 1000）在搞，恢复动作
 是厂商**云端下发的「系统控制列表」**，不是本地扫描：
@@ -310,7 +315,7 @@ com.skyworthdigital.backgroundwhitelist / .optimizelist
 把 6 个顽固包追加进 `startupblacklist` + `backgroundblacklist` 后重启实测：
 **值被云端列表覆盖回去了**，包照样恢复。固件原值备份在 `backup/firmware-blacklists.txt`。
 
-### 唯一能根治的办法：`pm uninstall --user 0`（目前没采用）
+### 唯一能根治的办法：`pm uninstall --user 0`（已采用，卸 4 个）
 
 包对 user 0 不存在时，云端那个 `unHiddenSingleApp` 会直接抛异常 —— logcat 里就有现成例子：
 
@@ -319,18 +324,28 @@ java.lang.IllegalArgumentException: Unknown package: com.starcor.mango
     at ...AppManagerUtils.unHiddenSingleApp
 ```
 
-实测可卸、也可一键还原（拿 `logcollector` 验过）：
+做法（`./scripts/15-uninstall.sh` 就是干这个，卸载前先把 APK 复制到 `/sdcard/p3-backup/`）：
 
 ```bash
 pm uninstall -k --user 0 com.skyworthdigital.logcollector   # → Success，包消失
 pm install-existing      com.skyworthdigital.logcollector   # → installed for user: 0，装回来
 ```
 
-代价：`voiceassistant` 卸了语音遥控失效、`skymediacenter` 卸了 USB 播放失效
-（`ottstatsv2` / `ott.advert.app` / `skyappupdate` / `logcollector` 基本无害）。
-系统 OTA 不受影响（那是 `upgrade` 管）。**当前选择不卸**，继续用看门狗接住。
+**实测结果（重启后 136 秒查，已过云端恢复窗口）**：
 
-补充一句恢复频率：实测补回后最快 **9 秒**就又被全部恢复，所以看门狗跑得越勤越干净。
+| 包 | 处理后重启的结果 |
+|---|---|
+| ottstatsv2 / ott.advert.app / skyappupdate / logcollector | 依然不存在 ✓ 云端装不回来 |
+| voiceassistant / skymediacenter（仅停用） | 被恢复启用（预期，看门狗补） |
+| 屏保 | 固件仍写回广告组件（但组件已不存在）→ 需 `restore_dream` 改回 AerialDream |
+
+`-k` 表示保留数据目录；APK 也没真删：卸载只针对 user 0，`/system` 里那份和
+`/sdcard/p3-backup/` 的备份都还在。要完全回到原样：`./scripts/40-restore.sh --apps`。
+
+代价：只卸了 4 个基本无害的（埋点、广告、应用更新、日志），语音助手和媒体中心保留停用。
+系统 OTA 不受影响（那是 `upgrade` 管）。
+
+补充一句恢复频率：只停用的那 2 个，补回后最快 **9 秒**就又被恢复，所以看门狗跑得越勤越干净。
 
 **别试 `pm suspend`**：实测更糟。它确实能让包进入 `suspended=true stopped=true`，
 但开机广播照样把它们拉起来（固件对 system UID 的包是绕过 stopped 状态直接发的），

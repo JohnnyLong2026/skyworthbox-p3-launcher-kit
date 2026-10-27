@@ -28,6 +28,25 @@ restore_params() {
   ok "参数已还原"
 }
 
+restore_uninstalled() {
+  info "把已卸载的系统应用装回来（15-uninstall.sh 卸的那批）"
+  local p n=0
+  # fd 3 读清单：循环体里的 adb 会抢 stdin
+  while read -r p <&3; do
+    p="$(echo "$p" | tr -d '\r' | sed 's/package://' | sed 's/#.*//' | xargs)"
+    [ -z "$p" ] && continue
+    case "$p" in \#*) continue;; esac
+    if pkg_present "$p"; then
+      echo "  已存在：$p"
+      continue
+    fi
+    sh "pm install-existing $p" | sed 's/^/  /'
+    n=$((n+1))
+  done 3< "$UNINSTALL_LIST"
+  [ "$n" -eq 0 ] && echo "  没有需要装回的包"
+  return 0
+}
+
 restore_apps() {
   info "启用所有被停用的应用"
   for p in $(sh "pm list packages -d" | sed 's/package://' | tr -d '\r'); do
@@ -36,6 +55,7 @@ restore_apps() {
   # suspend 是 disable-user 之外叠的那层，不解掉的话包虽然启用了但仍然收不到任何组件调用
   info "解除 suspend"
   unsuspend_stubborn
+  restore_uninstalled
   ok "应用已还原"
 }
 
