@@ -62,3 +62,8 @@ if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
 else
   ok "部署完成（未重启）。下次开机生效"
 fi
+
+echo
+warn "固件每隔一阵子会把 6 个包恢复启用并把屏保抢回广告，盒子自己补不回来。"
+warn "想让它一直保持优化后的状态，另开一个终端跑看门狗："
+warn "    BOX_TARGET=$BOX ./60-watch-reboot.sh"

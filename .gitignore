@@ -11,6 +11,7 @@ local.properties
 backup/*.png
 backup/*.txt
 !config/*.txt
+backup/*.log
 
 # Python
 __pycache__/

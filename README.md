@@ -211,10 +211,12 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 ./scripts/10-optimize.sh                 # 只做系统优化
 ```
 
-### D. 重启后状态体检
+### D. 重启后状态体检 / 自动补回
 
 ```bash
 ./scripts/90-check-status.sh            # HOME / 屏保 / 已停用包 / 常驻进程 Pss / 可用内存
+./scripts/60-watch-reboot.sh            # 常驻：固件把包恢复启用就自动补回（详见"注意事项"）
+./scripts/60-watch-reboot.sh --once     # 只查一次
 ```
 
 重启后想知道"现在到底跑了些什么"，跑这一个就够了。盒子 IP 写在 `scripts/box.conf` 里，
@@ -270,8 +272,20 @@ PackageManager: Failed to scan /system/app/SkyOttstats-origin:
 **已知无效的办法**：`pm disable --user 0` 对它们直接被拒
 （`Security exception: Shell cannot change component state ... to 2`），shell 只有 `disable-user` 的权限。
 
-**现在的应对**：不折腾守护进程，发现屏保变回广告或内存不对劲时，重跑一次
-`./scripts/10-optimize.sh` 全部补回来（幂等，已停用的会跳过）。
+盒子自己没法自愈：`pm disable-user` 只有 adb shell（UID 2000）有权限，应用进程执行会被拒，
+而第三方开机广播又被固件全拦（见"坑 2"），所以这事儿只能从 PC 这边盯着。
+
+**现在的应对**：`./scripts/60-watch-reboot.sh` 常驻轮询，发现缺什么就自动补：
+
+```bash
+BOX_TARGET=192.168.1.5:5555 ./scripts/60-watch-reboot.sh          # 常驻，30 秒看一次
+BOX_TARGET=192.168.1.5:5555 ./scripts/60-watch-reboot.sh --once   # 只查一次，缺就补
+```
+
+它盯的不是"有没有重启"，而是"该停的停了没"，所以固件在开机后任意时刻恢复都接得住。
+每次轮询只有 2 次 adb 调用（读停用列表 + 读屏保），没缺就什么都不做。
+想让 PC 开机也带着它跑，用 Windows 计划任务挂 `--once`（`schtasks /sc minute /mo 5`）
+或登录时触发常驻模式。
 
 ---
 
