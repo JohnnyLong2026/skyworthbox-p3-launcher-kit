@@ -86,6 +86,31 @@ STOCK_DREAM="com.skyworthdigital.ott.advert.app/com.skyworthdigital.ott.advert.a
 AUTOSTART_PKG="com.ktcp.launcher.autostart"
 AUTOSTART_SVC="com.skyworthdigital.autostart.ReminderService"
 
+# ---------- 顽固包 ----------
+# 有一批包光靠 disable-user 停不住：固件会把它们恢复启用，而且它们跑在 system UID 下，
+# 开机时系统直接给它们发广播（logcat -b events 里 am_proc_start 照样出现）。
+#
+# 试过 pm suspend，实测不但没用还更糟：suspend 的包照样被开机广播拉起来，
+# 而且拉起来之后退不出去 —— 6 个包全部常驻，合计多占约 107MB（不 suspend 时
+# 只有 ottstatsv2 的 15MB 常驻，其余起来后自行退出）。所以脚本不做 suspend，
+# 这里只留 unsuspend，用来收拾别人（或以前）误 suspend 过的情况。
+STUBBORN_LIST="$REPO_ROOT/config/stubborn-list.txt"
+
+stubborn_packages() {
+  [ -f "$STUBBORN_LIST" ] || return 0
+  grep -v '^[[:space:]]*#' "$STUBBORN_LIST" | sed 's/#.*//' | tr -d '\r' | xargs -n1 2>/dev/null | grep -v '^$'
+}
+
+unsuspend_stubborn() {
+  local p n=0
+  for p in $(stubborn_packages); do
+    [ -z "$p" ] && continue
+    sh "pm unsuspend $p" >/dev/null 2>&1 && { echo "  已解除 suspend：$p"; n=$((n+1)); }
+  done
+  [ "$n" -eq 0 ] && echo "  没有处于 suspend 的包"
+  return 0
+}
+
 # ---------- 屏保 ----------
 # 固件在开机时会把 screensaver_components 写回广告组件，所以这不是一次性设置：
 # 装完 Aerial、每次重启之后都要调用一次。已是 Aerial 时什么都不做。

@@ -272,6 +272,17 @@ PackageManager: Failed to scan /system/app/SkyOttstats-origin:
 **已知无效的办法**：`pm disable --user 0` 对它们直接被拒
 （`Security exception: Shell cannot change component state ... to 2`），shell 只有 `disable-user` 的权限。
 
+**别试 `pm suspend`**：实测更糟。它确实能让包进入 `suspended=true stopped=true`，
+但开机广播照样把它们拉起来（固件对 system UID 的包是绕过 stopped 状态直接发的），
+而且拉起来之后**退不出去** —— 6 个包全部变常驻，合计多占约 107 MB。
+不 suspend 时只有 ottstatsv2 的 15 MB 常驻，其余起来后自行退出。
+（`config/stubborn-list.txt` 记着这件事，`40-restore.sh` 会顺手 unsuspend 收拾残局。）
+
+开机时间线实测（`logcat -b events | grep boot_progress / am_proc_start`）：
+zygote preload 5.6s → PMS 就绪 11.0s → AMS 就绪 15.1s → **亮屏 19.3s** → 桌面画完 19.5s
+→ 桌面停留 7.7s（5 秒延迟 + 等网络）→ 影视仓起来。前面那 19 秒是固件和预装包数量决定的，
+停用包不会减少 PMS 扫描的 APK，动不了。
+
 盒子自己没法自愈：`pm disable-user` 只有 adb shell（UID 2000）有权限，应用进程执行会被拒，
 而第三方开机广播又被固件全拦（见"坑 2"），所以这事儿只能从 PC 这边盯着。
 

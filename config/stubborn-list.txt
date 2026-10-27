@@ -1,0 +1,31 @@
+# 顽固包：disable-user 停不住、开机照样被拉起来的那批
+#
+# 两个特点（2026-10-27 实测）：
+#   1. 固件会隔一阵子把它们恢复启用（logcat 里能看到 /system/app 被重新扫描）
+#   2. 它们跑在 system UID（1000）下，开机时系统直接给它们发广播，
+#      disable-user 拦不住 —— logcat -b events 里 am_proc_start 照样出现：
+#        com.skyworthdigital.ottstatsv2        added application
+#        com.skyworthdigital.skyappupdate      UpdateAppReceiver
+#        com.skyworthdigital.logcollector      LogCmdReceiver
+#        com.skyworthdigital.ott.advert.app    AdvertBroadcastReceiver
+#        com.skyworthdigital.voiceassistant    BootReceiver
+#        com.skyworthdigital.skymediacenter    UsbReceiver
+#
+# 试过的办法（都别再试了）：
+#   - pm disable --user 0  → Security exception，shell 没有改组件状态的权限
+#   - pm suspend           → 不但没用还更糟：包照样被拉起来，而且起来之后退不出去，
+#                             6 个全变常驻，合计多占 ~107MB（不 suspend 时只有
+#                             ottstatsv2 的 15MB 常驻，其余起来后自己会退出）
+#
+# 所以脚本对这批包只做 disable-user，不做别的。这个列表现在只用于
+# scripts/40-restore.sh 的 pm unsuspend —— 万一谁手贱 suspend 过，还原时能解掉。
+#
+# 能接受的现状：开机后它们会各起一次（抢几秒 CPU），之后自行退出；
+# 只有 ottstatsv2 以 system UID 常驻 15MB 且杀不掉，重启也没用。
+
+com.skyworthdigital.ottstatsv2
+com.skyworthdigital.ott.advert.app
+com.skyworthdigital.skyappupdate
+com.skyworthdigital.logcollector
+com.skyworthdigital.voiceassistant
+com.skyworthdigital.skymediacenter

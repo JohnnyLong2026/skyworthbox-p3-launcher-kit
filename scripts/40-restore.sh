@@ -33,6 +33,9 @@ restore_apps() {
   for p in $(sh "pm list packages -d" | sed 's/package://' | tr -d '\r'); do
     sh "pm enable $p" >/dev/null 2>&1 && echo "  已启用：$p"
   done
+  # suspend 是 disable-user 之外叠的那层，不解掉的话包虽然启用了但仍然收不到任何组件调用
+  info "解除 suspend"
+  unsuspend_stubborn
   ok "应用已还原"
 }
 
