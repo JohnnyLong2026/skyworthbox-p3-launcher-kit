@@ -7,6 +7,11 @@ source scripts/box.conf
 IP="${1:-${BOX_TARGET%:*}}"
 adb connect "$IP:5555" >/dev/null 2>&1
 S() { adb -s "$IP:5555" shell "$@" 2>/dev/null | tr -d '\r'; }
+if ! adb devices | grep -q "^$IP:5555"; then
+  echo "[错误] 连不上 $IP:5555。用法：./scripts/90-check-status.sh 192.168.1.8"
+  echo "       或 BOX_TARGET=192.168.1.8:5555 ./scripts/90-check-status.sh（不建议改 box.conf，那是公开仓库）"
+  exit 1
+fi
 
 echo "===== 1. 桌面 HOME ====="
 S cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null | tail -1
