@@ -330,5 +330,12 @@ SSH 公钥只登记一次就一直有效；没登记时脚本会把公钥打出�
 - Aerial 桌面：[pengchujin/aerial-tv](https://github.com/pengchujin/aerial-tv)（Apache-2.0），本仓库只保留改动补丁
 - 「定时启动」为本仓库自研，MIT
 
+这台盒子的资料已经回给上游，两个 PR 都已合并：
+
+| PR | 内容 | 状态 |
+|---|---|---|
+| [cleanyourtv #1730](https://github.com/Gathin23/cleanyourtv/pull/1730) | `examples/skyworth-xiaopai-p3/`（debloat.txt + tv.json） | 2026-10-25 merged |
+| [aerial-tv #641](https://github.com/pengchujin/aerial-tv/pull/641) | `docs/devices/skyworth-p3-box.md` + 机型表两行 | 2026-10-27 merged |
+
 盒子端的所有操作都是 ADB 标准命令，不修改系统分区、不刷机，不影响保修所需的系统完整性。
 按本文档操作造成的任何后果请自行承担——尤其是 `pm disable-user` 和停用官方桌面这两步。

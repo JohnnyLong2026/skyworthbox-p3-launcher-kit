@@ -1,6 +1,6 @@
 # 03 Aerial 桌面部署
 
-上游：[pengchujin/aerial-tv](https://github.com/pengchujin/aerial-tv)，本仓库基于提交 `1ea7d03`。
+上游：[pengchujin/aerial-tv](https://github.com/pengchujin/aerial-tv)，本仓库基于提交 `2b2eb21`（1.61，versionCode 75）。
 
 ## 一键装（用现成 APK）
 
@@ -15,7 +15,7 @@ export ANDROID_HOME=/path/to/android-sdk
 ./scripts/21-build-aerial.sh
 ```
 
-脚本会：clone 上游 → checkout `1ea7d03` → 应用 `patches/aerial-tv-p3.patch` →
+脚本会：clone 上游 → checkout `2b2eb21` → 应用 `patches/aerial-tv-p3.patch` →
 `./gradlew assembleStandardRelease` → 安装 → `cmd package set-home-activity` → 停用官方桌面。
 
 首次编译约 9 分钟，增量约 2 分钟。签名用本机 debug key（**不能覆盖官方包升级**，升级必须重新编译）。
@@ -54,6 +54,29 @@ com.ktcp.launcher.autostart/com.skyworthdigital.autostart.ReminderService
 ```kotlin
 if (fresh) AutostartBridge.armOncePerBoot(this)
 ```
+
+### 4. `MainActivity.kt`：`openBootSource()` 延迟 5 秒
+
+Aerial 设置里配了"开机打开的应用"后，桌面一冒头就 `startActivity`，在这台盒子上看着像
+根本没进桌面。加 `BOOT_SOURCE_DELAY_MS = 5_000L`：
+
+```kotlin
+lifecycleScope.launch {
+    delay(BOOT_SOURCE_DELAY_MS)      // 加在函数里，不是调用处
+    ...
+}
+```
+
+**必须加在函数里**：这台机器是 Home Guard 带 `EXTRA_WOKE` 把桌面拉回来的，实际走的是
+`openBootSource("brought back on wake")`，不是 `"boot"` 那条。加在 `"boot"` 调用点上
+重启实测完全没效果，logcat 会告诉你走的哪条：
+
+```
+I/Aerial: brought back on wake: opening 影视仓, what the TV starts on
+```
+
+实测开机时间线：桌面 45.818 Displayed → 52.964 才跳走，差 7.1 秒，其中约 2 秒是
+`BOOT_APP_NETWORK_WAIT_MS` 在等网络。
 
 ## 天气城市
 
