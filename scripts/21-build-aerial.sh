@@ -8,16 +8,19 @@
 # 上游：https://github.com/pengchujin/aerial-tv
 # 本仓库只保留改动（patches/aerial-tv-p3.patch），不复制上游 96MB 源码。
 #
-# 补丁做了两件事：
+# 补丁做了三件事：
 #   1. applicationId 改成 com.ktcp.launcher.aerial（固件 HOME 前缀白名单要求 com.ktcp.launcher*）
 #      Java 命名空间仍是 app.orchard.tv，所以组件名是 com.ktcp.launcher.aerial/app.orchard.tv.MainActivity
 #   2. 加 AutostartBridge：开机首次进桌面时显式拉起「定时启动」的服务
 #      （这台固件屏蔽所有第三方 BOOT_COMPLETED 广播，只有桌面自己能带它起来）
+#   3. openBootSource 延迟 5 秒：不加的话桌面一冒头就跳走，看着像根本没进桌面。
+#      延迟要加在 openBootSource 里而不是调用处——这台机器是 Home Guard 带 EXTRA_WOKE
+#      把桌面拉回来的，实际走的是 "brought back on wake" 那条路，不是 boot 那条。
 # ============================================================
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 UPSTREAM="https://github.com/pengchujin/aerial-tv"
-PINNED_COMMIT="2b2eb21"          # 1.61 的提交；补丁只依赖 3 处上下文，换版本一般能直接复用
+PINNED_COMMIT="2b2eb21"          # 1.61 的提交；补丁只依赖几处上下文，换版本一般能直接复用
 AERIAL_VER="1.61"
 WORK="${AERIAL_SRC:-$REPO_ROOT/../aerial-tv}"
 PATCH="$REPO_ROOT/patches/aerial-tv-p3.patch"

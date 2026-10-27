@@ -121,6 +121,22 @@ Aerial 自带 `firstStartSinceBoot()`（用 `Settings.Global.BOOT_COUNT` 去重�
 > 所以定时启动里对"被 arm 两次"做了幂等（只认第一次），否则第二次会用更晚的计时覆盖第一次，
 > 白白多等十几秒。
 
+### 坑 3：桌面一冒头就跳走，看着像根本没进桌面
+
+Aerial 设置里配了"开机打开的应用"后，它会在 `openBootSource()` 里立刻 `startActivity`。
+在这台盒子上表现很难看：桌面刚起来就被顶掉，画面直接落在影视仓里。
+
+补丁给 `openBootSource()` 加了 5 秒延迟（`BOOT_SOURCE_DELAY_MS`）。**延迟要加在函数里，
+不能加在调用处**——实测这台机器是 Home Guard 带 `EXTRA_WOKE` 把桌面拉回来的，走的是
+`openBootSource("brought back on wake")` 那条路，不是 `"boot"` 那条：
+
+```
+22:23:17.534 I/Aerial: brought back on wake: opening 影视仓   ← 加在 boot 调用处，管不到这条
+```
+
+加完之后开机时间线（logcat 实测）：桌面 45.818 显示完成 → 52.964 才跳走，
+中间差 7 秒，其中约 2 秒是 `BOOT_APP_NETWORK_WAIT_MS` 在等网络。
+
 ---
 
 ## 目录结构
