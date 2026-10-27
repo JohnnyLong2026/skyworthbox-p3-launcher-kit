@@ -1,0 +1,10 @@
+[startupblacklist]
+com.xiaodianshi.tv.yst,com.gitvvideo.skyworthopen,com.dangbei.tvlauncher,com.moretv.android,com.montage.player,com.kwai.tv.yst
+[backgroundblacklist]
+com.dangbei.tvlauncher
+[homeblacklist]
+com.xiaodianshi.tv.yst,com.gitvvideo.skyworthopen,com.hezi.remoteinstaller,com.dangbei.tvlauncher,com.astrill.astrillvpn,com.fobwifi.transocks.tv,com.hpplay.happyplay.aw.new,com.xiaopaitech.player,com.termux,com.github.kr328.clash,com.tidalab.v2board.clash.foss,com.gitv.dvb.live  ,com.moretv.android,com.montage.player,com.rocket.e1781a7e4510111,com.hpplay.happyplay.aw,com.fengmizhibo.live,com.cibn.tv,com.kwai.tv.yst
+[homewhitelist]
+com.xiaopaitech.supportsdk
+[startupwhitelist]
+com.xiaopaitech.supportsdk,com.hezi.remoteinstaller,com.astrill.astrillvpn,com.fobwifi.transocks.tv,com.hpplay.happyplay.aw.new,com.xiaopaitech.player,com.termux,com.github.kr328.clash,com.tidalab.v2board.clash.foss,com.gitv.dvb.live  ,com.rocket.e1781a7e4510111,com.hpplay.happyplay.aw,com.fengmizhibo.live,com.cibn.tv

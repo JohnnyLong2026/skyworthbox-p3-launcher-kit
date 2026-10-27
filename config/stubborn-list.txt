@@ -33,6 +33,14 @@
 #                            而且它管一堆系统属性，停了风险大于收益，别停。
 #   - 改 /etc/hosts 屏蔽它下载列表的域名 → 做不到：adb shell 是 uid=2000，
 #     /system 是 ro 挂载，hosts 只读。
+#   - 写固件自带的 settings system 黑名单（startupblacklist / backgroundblacklist）
+#                          → 写入成功，但开机后就被云端列表覆盖回原值，包照样恢复。
+#                            固件原值备份在 backup/firmware-blacklists.txt
+#
+# 唯一能根治的：pm uninstall -k --user 0（包对 user 0 不存在，它的 unHiddenSingleApp
+# 就会抛 Unknown package —— logcat 里 com.starcor.mango 就是这个报错）。
+# 可一键还原：pm install-existing <pkg>。实测 logcollector 走通了卸+装。
+# 当前没采用：卸 voiceassistant 语音遥控失效、卸 skymediacenter USB 播放失效。
 #
 # 所以脚本对这批包只做 disable-user，不做别的。这个列表现在只用于
 # scripts/40-restore.sh 的 pm unsuspend —— 万一谁手贱 suspend 过，还原时能解掉。

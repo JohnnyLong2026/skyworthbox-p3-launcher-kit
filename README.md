@@ -291,8 +291,46 @@ BOOT_COMPLETED → SkyPropretyReceiver → SkyPropertyService
 | 停用 `com.skyworthdigital.upgrade` | 无效，重启后照样掉回 20；它自己也被恢复，白丢 OTA 能力 |
 | 停用 `skycommonpropertymanager` | 无效，它同为 uid 1000，`BOOT_COMPLETED` 拦不住，开机照样起来照样下发 |
 | 改 `/etc/hosts` 屏蔽下载域名 | 做不到，adb shell 是 uid 2000、`/system` 只读挂载 |
+| 写固件自带的开机黑名单（见下） | 写入成功，但**开机后就被云端列表覆盖**，包照样恢复 |
 
-一句话：免 root 没有根治的路子，只能靠看门狗接住。
+### 固件自带的黑白名单（`settings system` 表，会被云端覆盖）
+
+固件自己有一套启动管控，9 个键都在 `settings list system` 里：
+
+```
+com.skyworthdigital.startupblacklist      开机启动黑名单
+com.skyworthdigital.backgroundblacklist   后台运行黑名单
+com.skyworthdigital.homeblacklist         HOME 黑名单（不能当桌面）
+com.skyworthdigital.homewhitelist         HOME 白名单（原值只有 com.xiaopaitech.supportsdk）
+com.skyworthdigital.startupwhitelist      开机启动白名单
+com.skyworthdigital.blackapplist.forbiduse / .forbidinstall
+com.skyworthdigital.backgroundwhitelist / .optimizelist
+```
+
+把 6 个顽固包追加进 `startupblacklist` + `backgroundblacklist` 后重启实测：
+**值被云端列表覆盖回去了**，包照样恢复。固件原值备份在 `backup/firmware-blacklists.txt`。
+
+### 唯一能根治的办法：`pm uninstall --user 0`（目前没采用）
+
+包对 user 0 不存在时，云端那个 `unHiddenSingleApp` 会直接抛异常 —— logcat 里就有现成例子：
+
+```
+java.lang.IllegalArgumentException: Unknown package: com.starcor.mango
+    at ...AppManagerUtils.unHiddenSingleApp
+```
+
+实测可卸、也可一键还原（拿 `logcollector` 验过）：
+
+```bash
+pm uninstall -k --user 0 com.skyworthdigital.logcollector   # → Success，包消失
+pm install-existing      com.skyworthdigital.logcollector   # → installed for user: 0，装回来
+```
+
+代价：`voiceassistant` 卸了语音遥控失效、`skymediacenter` 卸了 USB 播放失效
+（`ottstatsv2` / `ott.advert.app` / `skyappupdate` / `logcollector` 基本无害）。
+系统 OTA 不受影响（那是 `upgrade` 管）。**当前选择不卸**，继续用看门狗接住。
+
+补充一句恢复频率：实测补回后最快 **9 秒**就又被全部恢复，所以看门狗跑得越勤越干净。
 
 **别试 `pm suspend`**：实测更糟。它确实能让包进入 `suspended=true stopped=true`，
 但开机广播照样把它们拉起来（固件对 system UID 的包是绕过 stopped 状态直接发的），
