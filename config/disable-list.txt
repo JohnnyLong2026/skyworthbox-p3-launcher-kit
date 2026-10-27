@@ -1,3 +1,10 @@
+# 创维小湃 P3（Q5001 / cupid-p2）停用清单
+# 用法：./scripts/10-optimize.sh（还原：./scripts/40-restore.sh）
+# 全部是 disable-user 停用（不是卸载），随时能恢复。改完跑一次脚本即可，重复跑幂等。
+#
+# 分四组，按"停了会失去什么"排的，照自己的需要取舍。
+
+# ① 广告、商店、投屏、远程调试 —— 原厂预装但日常用不到
 package:com.skyworthdigital.softap
 package:com.skyworthdigital.skycleandisk
 package:com.softwinner.dragonbox
@@ -5,7 +12,6 @@ package:com.nanosic.www.otaservice
 package:com.jd.smartservicetwo
 package:com.skyworthdigital.miracast
 package:com.skyworthdigital.remotedebug
-package:com.skyworthdigital.sky2dlauncherv4
 package:com.skyworthdigital.ott.guide
 package:com.skyworthdigital.smarthome
 package:com.softwinner.agingdragonbox
@@ -13,3 +19,30 @@ package:com.mipt.store
 package:com.skyworthdigital.skywechatclient
 package:com.skyworthdigital.optimization
 package:com.tianci.ad
+
+# ② 开机后常驻的后台上报 / 广告 / 工厂测试 —— 停掉不影响任何日常功能
+package:com.skyworthdigital.ottstatsv2          # 数据采集：观看行为上报
+package:com.skyworthdigital.ott.advert.app      # 小湃通：广告推送，就是它每次开机把屏保抢回去
+package:com.skyworthdigital.skyappupdate        # 应用更新
+package:com.skyworthdigital.logcollector        # 日志收集上传
+package:com.android.noticewidget                # 通知小部件
+package:com.skyworthdigital.autotest            # 工厂自动化测试
+package:com.hezi.remoteinstaller                # 应用安装：手机端推送安装（走 ADB 不需要）
+
+# ③ 功能取舍 —— 这几条按自己需求决定，不需要就都停
+package:com.skyworthdigital.voiceassistant      # 小湃语音助手（停了语音遥控失效）
+package:com.skyworthdigital.shortcutkeyssetting # 一键直达（停了遥控器自定义快捷键失效）
+package:com.skyworthdigital.skymediacenter      # 媒体中心（停了本地/U 盘播放受影响）
+package:com.gitv.dvb.live                       # 宽带电视（原厂直播，用影视仓就不需要）
+
+# ④ 官方桌面 —— 只在替代桌面已确认为 HOME 之后才停
+# 脚本默认跳过它，确认 Aerial 已接管后加 --with-launcher
+package:com.skyworthdigital.sky2dlauncherv4
+
+# 保留不用的（别加进来）：
+#   com.skyworthdigital.mediarender  投屏（占内存最大但功能要用）
+#   com.sohu.inputmethod.sogou.tv    搜狗输入法（影视仓搜索要打字）
+#   com.skyworthdigital.settings     系统设置
+#   com.skyworthdigital.upgrade      固件升级（想升系统时记得先恢复）
+#   skyworth.process.media.scan      系统 UID 1000 的媒体扫描进程，实际 Pss 不到 1MB，
+#                                    且定位不到归属包名，别碰

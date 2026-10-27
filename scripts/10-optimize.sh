@@ -38,8 +38,9 @@ info "开始停用（清单：$LIST）"
 # 用 fd 3 读清单：循环体里的 adb 会吃掉 stdin，直接用 < "$LIST" 的话
 # 第一次迭代之后 stdin 就被 adb 抢光了，只读到第一行（表现出来是"只停用了第一个包"）
 while read -r p <&3; do
-  p="$(echo "$p" | tr -d '\r' | sed 's/package://' | xargs)"
+  p="$(echo "$p" | tr -d '\r' | sed 's/package://' | sed 's/#.*//' | xargs)"
   [ -z "$p" ] && continue
+  case "$p" in \#*) continue;; esac      # 清单里的分组注释
 
   if [ "$p" = "$OFFICIAL_LAUNCHER" ] && [ "$WITH_LAUNCHER" -eq 0 ]; then
     warn "跳过官方桌面 $p（未加 --with-launcher）"
