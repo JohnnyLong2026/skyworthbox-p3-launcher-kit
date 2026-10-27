@@ -1,5 +1,33 @@
 # 更新记录
 
+## v1.4（2026-10-27）Aerial 1.49 → 1.61，并补上漏掉的授权步骤
+
+盒子出厂重置后重装整套，借这次把桌面升到上游最新的 1.61（versionCode 75，发布当天）。
+
+**升级**
+
+- `apk/aerial-tv-1.61-p3.apk` 替换 1.49。`patches/aerial-tv-p3.patch` 重新基于 1.61 生成：
+  原来那版在 1.61 上 `git apply` 失败（MainActivity 的 import 区变了），
+  但改动本身完全适用——`applicationId` 一行、MainActivity 加三行、新增 `AutostartBridge.kt`，
+  手工落到对应位置后编译通过（2 分 37 秒）。
+- `scripts/21-build-aerial.sh` 的 `AERIAL_VER` / `PINNED_COMMIT` 跟着改成 1.61 / `2b2eb21`。
+
+**新增 `scripts/11-grant-permissions.sh`**
+
+这一步以前是散在对话里手动敲的，从没进过仓库，所以这次重置后整套权限都丢了：
+WRITE_SECURE_SETTINGS、悬浮窗、用量访问、通知监听、守护用无障碍服务，一个都没给。
+缺了它们 Aerial 只是个空壳——屏保切不动，HOME 被厂商抢回去也没人救。
+
+脚本里分三类处理，是因为它们根本不是一种东西：
+
+| 类别 | 怎么给 |
+|---|---|
+| 运行时权限 | `pm grant`（幂等，重复跑不报错） |
+| WRITE_SETTINGS / REQUEST_INSTALL_PACKAGES | `pm grant` 会抛 `not a changeable permission type`，只能 `appops set ... allow` |
+| 通知监听 / 无障碍服务 | `settings put secure`，且**要拼在厂商原有条目后面**，直接覆盖会把创维语音助手的无障碍关掉 |
+
+出厂重置或重装 Aerial 后都要重跑一次。
+
 ## v1.3（2026-10-26）精简：只留当前版本，线上线下同步
 
 仓库里攒了几版迭代的产物和探索期的脚本，对拿到这个项目的人是噪音。清掉，只留当前这一套。

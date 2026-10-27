@@ -7,7 +7,7 @@
 #   ./99-deploy-all.sh <包名> <名称> <秒数>    顺便设好定时启动目标
 #     例：./99-deploy-all.sh com.huawei.himovceie 影视仓 5
 #
-# 步骤：体检 → 装 Aerial 设 HOME → 装定时启动 → 设跳转目标 → 系统优化 → 重启验证
+# 步骤：体检 → 装 Aerial 设 HOME → 补权限 → 装定时启动 → 设跳转目标 → 系统优化 → 重启验证
 # 全程免 root，所有改动可 ./40-restore.sh 还原。
 # ============================================================
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
@@ -30,21 +30,25 @@ info "② 安装 Aerial 桌面并设为默认"
 if [ "$BUILD" -eq 1 ]; then "$S/21-build-aerial.sh" || die "Aerial 部署失败"
 else "$S/21-build-aerial.sh" --apk || die "Aerial 部署失败"; fi
 
-# 2 定时启动
-info "③ 安装定时启动"
+# 2 权限（装完 Aerial 必做，漏了桌面只能当空壳用）
+info "③ 补齐 Aerial 权限"
+"$S/11-grant-permissions.sh" || die "权限补齐失败"
+
+# 3 定时启动
+info "④ 安装定时启动"
 if [ "$BUILD" -eq 1 ]; then "$S/20-build-autostart.sh" || die "定时启动部署失败"
 else "$S/20-build-autostart.sh" --apk || die "定时启动部署失败"; fi
 
-# 3 跳转目标
+# 4 跳转目标
 if [ -n "$TARGET_PKG" ]; then
-  info "④ 设置跳转目标"
+  info "⑤ 设置跳转目标"
   "$S/30-set-autostart.sh" "$TARGET_PKG" "$TARGET_LABEL" "$TARGET_DELAY"
 else
-  warn "④ 未指定跳转目标，跳过。稍后自己跑：./30-set-autostart.sh <包名> <名称> <秒数>"
+  warn "⑤ 未指定跳转目标，跳过。稍后自己跑：./30-set-autostart.sh <包名> <名称> <秒数>"
 fi
 
-# 4 系统优化（不动官方桌面：它已被 21 脚本单独停用）
-info "⑤ 系统优化"
+# 5 系统优化（不动官方桌面：它已被 21 脚本单独停用）
+info "⑥ 系统优化"
 "$S/10-optimize.sh"
 
 # 5 重启

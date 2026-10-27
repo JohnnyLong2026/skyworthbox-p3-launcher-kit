@@ -17,8 +17,8 @@
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 UPSTREAM="https://github.com/pengchujin/aerial-tv"
-PINNED_COMMIT="f1c8ea97"         # 1.49 的提交；补丁只依赖 3 处上下文，换版本一般能直接复用
-AERIAL_VER="1.49"
+PINNED_COMMIT="2b2eb21"          # 1.61 的提交；补丁只依赖 3 处上下文，换版本一般能直接复用
+AERIAL_VER="1.61"
 WORK="${AERIAL_SRC:-$REPO_ROOT/../aerial-tv}"
 PATCH="$REPO_ROOT/patches/aerial-tv-p3.patch"
 APK="$REPO_ROOT/apk/aerial-tv-$AERIAL_VER-p3.apk"

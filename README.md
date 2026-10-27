@@ -147,6 +147,7 @@ skyworth-p3-launcher-kit/
 │   ├── 10-optimize.sh        系统优化（停用清单、调参、换屏保、清垃圾）
 │   ├── 20-build-autostart.sh 编译安装「定时启动」
 │   ├── 21-build-aerial.sh    clone 上游 → 打补丁 → 编译 → 安装 → 设为 HOME
+│   ├── 11-grant-permissions.sh  给 Aerial 补齐权限（重装后必跑，否则只能当空壳用）
 │   ├── 30-set-autostart.sh   设置跳转目标与延迟
 │   ├── 31-set-weather.sh     设置天气城市
 │   ├── 40-restore.sh         一键还原
@@ -154,7 +155,7 @@ skyworth-p3-launcher-kit/
 │   └── 50-backup-github.sh   把整套东西备份到 GitHub（SSH 免密 / zip）
 ├── apps/TVAutoStart/         「定时启动」完整源码（纯框架 API，无三方依赖）
 ├── patches/aerial-tv-p3.patch  Aerial 桌面的三处改动（不复制上游 96MB 源码）
-├── apk/                      编译好的 APK：Aerial 1.49、定时启动 v4.2，不想编译直接装
+├── apk/                      编译好的 APK：Aerial 1.61、定时启动 v4.2，不想编译直接装
 ├── tools/                    logo 生成、天气二维码解码、截图脱敏
 ├── config/                   停用清单、屏保原值备份
 └── assets/screenshots/       效果截图（已脱敏）
@@ -188,6 +189,7 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 
 ```bash
 ./scripts/21-build-aerial.sh --apk       # 只装 Aerial 桌面并设为 HOME
+./scripts/11-grant-permissions.sh        # 装完 Aerial 补权限（重置/重装后必跑）
 ./scripts/20-build-autostart.sh --apk    # 只装定时启动
 ./scripts/30-set-autostart.sh --list     # 看看能跳哪些应用
 ./scripts/10-optimize.sh                 # 只做系统优化
@@ -212,6 +214,7 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 | **侧装后要清 stopped 态** | `monkey -p <pkg> -c android.intent.category.LAUNCHER 1`，脚本已包含 |
 | **盒子会休眠** | 休眠后 ADB 无响应，需要遥控器唤醒。不是脚本出错 |
 | **卸载官方桌面有风险** | 只在第三方桌面已接管后停用，`10-optimize.sh` 默认跳过 |
+| **重置/重装后要补权限** | WRITE_SECURE_SETTINGS、悬浮窗、通知监听、守护无障碍都不会自动给，跑 `./scripts/11-grant-permissions.sh` |
 | **改设置页的"还原"是清空配置** | 不是关掉功能开关，点完就回到"未设置"状态 |
 | **Git Bash 环境** | adb daemon 每条命令结束会被清掉，脚本已每次重连；`adb pull` 要 `MSYS_NO_PATHCONV=1` |
 
