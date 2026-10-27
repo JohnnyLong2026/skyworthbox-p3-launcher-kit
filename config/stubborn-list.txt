@@ -1,7 +1,15 @@
 # 顽固包：disable-user 停不住、开机照样被拉起来的那批
 #
+# 元凶（2026-10-27 查到）：com.skyworthdigital.skycommonpropertymanager
+#   开机 BOOT_COMPLETED → SkyPropretyReceiver → SkyPropertyService
+#     → SkyDownloadSystemControlListProcess 联网下载厂商的「系统控制列表」
+#     → AppControlMsg.executeAppControl → AppManagerUtils.unHiddenSingleApp
+#     → setApplicationEnabledSetting(ENABLED)   ← 就是把包恢复启用的那一步
+#   列表里还有 useDefaultLauncher 之类字段，怀疑 HOME 偶尔被抢回也是它干的。
+#   恢复动作发生在开机后约 60 秒（等下载回调），之后还会周期性再来。
+#
 # 两个特点（2026-10-27 实测）：
-#   1. 固件会隔一阵子把它们恢复启用（logcat 里能看到 /system/app 被重新扫描）
+#   1. 固件会隔一阵子把它们恢复启用（上面那条链路）
 #   2. 它们跑在 system UID（1000）下，开机时系统直接给它们发广播，
 #      disable-user 拦不住 —— logcat -b events 里 am_proc_start 照样出现：
 #        com.skyworthdigital.ottstatsv2        added application
@@ -16,6 +24,15 @@
 #   - pm suspend           → 不但没用还更糟：包照样被拉起来，而且起来之后退不出去，
 #                             6 个全变常驻，合计多占 ~107MB（不 suspend 时只有
 #                             ottstatsv2 的 15MB 常驻，其余起来后自己会退出）
+#   - 停用 com.skyworthdigital.upgrade（怀疑是它在"修复"系统应用）
+#                          → 无效。重启后照样掉回 20 个，upgrade 自己也被恢复了。
+#                            白丢 OTA 升级能力，别停。
+#   - 停用 skycommonpropertymanager（真元凶，想着停了就没有恢复动作了）
+#                          → 无效。它同为 system UID，disable-user 拦不住它的
+#                            BOOT_COMPLETED，开机照样起来照样下发恢复。
+#                            而且它管一堆系统属性，停了风险大于收益，别停。
+#   - 改 /etc/hosts 屏蔽它下载列表的域名 → 做不到：adb shell 是 uid=2000，
+#     /system 是 ro 挂载，hosts 只读。
 #
 # 所以脚本对这批包只做 disable-user，不做别的。这个列表现在只用于
 # scripts/40-restore.sh 的 pm unsuspend —— 万一谁手贱 suspend 过，还原时能解掉。

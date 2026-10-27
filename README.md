@@ -269,8 +269,30 @@ PackageManager: Failed to scan /system/app/SkyOttstats-origin:
 重新扫描过后，这几个包就回到启用态，屏保也随之被广告组件抢回。
 触发时机不确定（观察到一次在停用后约 15 分钟）。
 
-**已知无效的办法**：`pm disable --user 0` 对它们直接被拒
-（`Security exception: Shell cannot change component state ... to 2`），shell 只有 `disable-user` 的权限。
+**元凶已查明**：是 `com.skyworthdigital.skycommonpropertymanager`（uid 1000）在搞，恢复动作
+是厂商**云端下发的「系统控制列表」**，不是本地扫描：
+
+```
+BOOT_COMPLETED → SkyPropretyReceiver → SkyPropertyService
+  → SkyDownloadSystemControlListProcess   联网下载控制列表
+  → AppControlMsg.executeAppControl → AppManagerUtils.unHiddenSingleApp
+  → setApplicationEnabledSetting(ENABLED)       ← 把包恢复启用
+```
+
+时机清楚了：开机后约 60 秒（等下载回调），之后还会周期性再来。
+列表里还有 `useDefaultLauncher` 字段，怀疑 HOME 偶尔被抢回也是它干的。
+
+**已知无效的办法**（都实测过，别再试）：
+
+| 办法 | 结果 |
+|---|---|
+| `pm disable --user 0` | 直接被拒（`Security exception: Shell cannot change component state ... to 2`），shell 只有 `disable-user` 权限 |
+| `pm suspend` | 更糟，见下 |
+| 停用 `com.skyworthdigital.upgrade` | 无效，重启后照样掉回 20；它自己也被恢复，白丢 OTA 能力 |
+| 停用 `skycommonpropertymanager` | 无效，它同为 uid 1000，`BOOT_COMPLETED` 拦不住，开机照样起来照样下发 |
+| 改 `/etc/hosts` 屏蔽下载域名 | 做不到，adb shell 是 uid 2000、`/system` 只读挂载 |
+
+一句话：免 root 没有根治的路子，只能靠看门狗接住。
 
 **别试 `pm suspend`**：实测更糟。它确实能让包进入 `suspended=true stopped=true`，
 但开机广播照样把它们拉起来（固件对 system UID 的包是绕过 stopped 状态直接发的），
