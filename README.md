@@ -74,7 +74,7 @@ Aerial 桌面、几秒后自动跳转直播软件的样子。**全程免 root、
 | 0 | **判断值不值得动** | 查 `ro.product.cpu.abi`、`getprop ro.serialno`、能否开 ADB | 64 位设备、有 ADB 就都能做 |
 | 1 | **开 ADB** | 设置 → 关于 → 连点版本号 → 开发者选项 → 网络调试 | 记下 IP，`adb connect IP:5555` |
 | 2 | **体检** | `./scripts/00-doctor.sh` | 先摸清跑了什么、能停什么，别一上来就删 |
-| 3 | **系统瘦身** | `./scripts/10-optimize.sh`：停 18 个常驻、调 6 项参数、换屏保、清缓存 | 只动系统应用，第三方一律不碰 |
+| 3 | **系统瘦身** | `./scripts/10-optimize.sh`：停 26 个常驻、调 6 项参数、换屏保、清缓存 | 只动系统应用，第三方一律不碰 |
 | 4 | **换桌面** | 改 `applicationId` 成白名单前缀 → 编译 → 装 → `set-home-activity` | **整件事的核心，见下方"坑 1"** |
 | 5 | **开机自启** | 桌面首次启动时显式 `startForegroundService` 拉起自己的服务 | **固件拦一切第三方开机广播，见"坑 2"** |
 | 6 | **细节调优** | 固定天气城市、换掉广告屏保、统一 logo、把倒计时压到 9 秒 | 都是"不影响功能但影响体感"的部分 |
@@ -194,6 +194,15 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 ./scripts/30-set-autostart.sh --list     # 看看能跳哪些应用
 ./scripts/10-optimize.sh                 # 只做系统优化
 ```
+
+### D. 重启后状态体检
+
+```bash
+./scripts/90-check-status.sh            # HOME / 屏保 / 已停用包 / 常驻进程 Pss / 可用内存
+```
+
+重启后想知道"现在到底跑了些什么"，跑这一个就够了。盒子 IP 写在 `scripts/box.conf` 里，
+也可以 `./scripts/90-check-status.sh 192.168.1.8` 临时指定。
 
 ### 回滚
 
