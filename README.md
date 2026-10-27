@@ -219,6 +219,7 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 |---|---|
 | **别用 Aerial 的「检查更新」** | 它下载官方 `app.orchard.tv` 包，会装成第二个应用。升级就重跑 `21-build-aerial.sh` |
 | **屏保重启后会变回广告** | 固件每次开机把 `screensaver_components` 写回创维广告组件。跑 `./scripts/10-optimize.sh` 补回 |
+| **6 个包会被固件自动恢复** | 见下方"固件会把一部分包恢复启用"，不是脚本没跑成功 |
 | **编译必须带包名参数** | `./gradlew assembleRelease -PlauncherApplicationId=com.ktcp.launcher.autostart` |
 | **侧装后要清 stopped 态** | `monkey -p <pkg> -c android.intent.category.LAUNCHER 1`，脚本已包含 |
 | **盒子会休眠** | 休眠后 ADB 无响应，需要遥控器唤醒。不是脚本出错 |
@@ -226,6 +227,35 @@ export ANDROID_HOME=/path/to/android-sdk     # 需要 platforms;android-36 + bui
 | **重置/重装后要补权限** | WRITE_SECURE_SETTINGS、悬浮窗、通知监听、守护无障碍都不会自动给，跑 `./scripts/11-grant-permissions.sh` |
 | **改设置页的"还原"是清空配置** | 不是关掉功能开关，点完就回到"未设置"状态 |
 | **Git Bash 环境** | adb daemon 每条命令结束会被清掉，脚本已每次重连；`adb pull` 要 `MSYS_NO_PATHCONV=1` |
+
+### 固件会把一部分包恢复启用
+
+停用 26 个之后隔一阵子再看，会掉回 20 个。被恢复的是这 6 个：
+
+```
+com.skyworthdigital.ottstatsv2       数据采集
+com.skyworthdigital.ott.advert.app   小湃通（就是它抢屏保）
+com.skyworthdigital.skyappupdate     应用更新
+com.skyworthdigital.logcollector     日志收集
+com.skyworthdigital.voiceassistant   语音助手
+com.skyworthdigital.skymediacenter   媒体中心
+```
+
+共同点：都是 `/system/app` 下**带 data 分区更新版本**的包。logcat 里能看到它们被重新扫描：
+
+```
+PackageManager: Failed to scan /system/app/SkyOttstats-origin:
+  Package com.skyworthdigital.ottstatsv2 ... updated version 46220 better than this 46002
+```
+
+重新扫描过后，这几个包就回到启用态，屏保也随之被广告组件抢回。
+触发时机不确定（观察到一次在停用后约 15 分钟）。
+
+**已知无效的办法**：`pm disable --user 0` 对它们直接被拒
+（`Security exception: Shell cannot change component state ... to 2`），shell 只有 `disable-user` 的权限。
+
+**现在的应对**：不折腾守护进程，发现屏保变回广告或内存不对劲时，重跑一次
+`./scripts/10-optimize.sh` 全部补回来（幂等，已停用的会跳过）。
 
 ---
 
