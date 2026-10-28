@@ -68,7 +68,7 @@ docs/                                  7 篇 Markdown + 4 份 HTML 说明
 scripts/                               10 个部署脚本（体检/优化/构建/部署/备份/还原）
 apps/TVAutoStart/                      定时启动完整源码
 patches/aerial-tv-p3.patch             Aerial 桌面的 3 处改动（不复制上游 96MB 源码）
-apk/                                   2 个成品 APK（Aerial 1.61、定时启动 v4.2）
+apk/                                   2 个成品 APK（Aerial 1.65、定时启动 v4.2）
 tools/                                 logo 生成、截图脱敏、天气 token 三个工具
 config/                                停用清单、屏保原值备份
 assets/screenshots/                    桌面与设置界面截图

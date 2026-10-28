@@ -174,7 +174,7 @@ skyworth-p3-launcher-kit/
 │   └── 50-backup-github.sh   把整套东西备份到 GitHub（SSH 免密 / zip）
 ├── apps/TVAutoStart/         「定时启动」完整源码（纯框架 API，无三方依赖）
 ├── patches/aerial-tv-p3.patch  Aerial 桌面的三处改动（不复制上游 96MB 源码）
-├── apk/                      编译好的 APK：Aerial 1.61、定时启动 v4.2，不想编译直接装
+├── apk/                      编译好的 APK：Aerial 1.65、定时启动 v4.2，不想编译直接装
 ├── tools/                    logo 生成、天气二维码解码、截图脱敏
 ├── config/                   停用清单、屏保原值备份
 └── assets/screenshots/       效果截图（已脱敏）

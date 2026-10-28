@@ -16,12 +16,14 @@
 #   3. openBootSource 延迟 5 秒：不加的话桌面一冒头就跳走，看着像根本没进桌面。
 #      延迟要加在 openBootSource 里而不是调用处——这台机器是 Home Guard 带 EXTRA_WOKE
 #      把桌面拉回来的，实际走的是 "brought back on wake" 那条路，不是 boot 那条。
+#      1.65 起上游自己加了 BootOpen（每次通电只开一次），和这条不冲突：它判重在前，
+#      我们的 delay 在后，顺序是 due() → delay → noteOpened()。
 # ============================================================
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 UPSTREAM="https://github.com/pengchujin/aerial-tv"
-PINNED_COMMIT="2b2eb21"          # 1.61 的提交；补丁只依赖几处上下文，换版本一般能直接复用
-AERIAL_VER="1.61"
+PINNED_REF="v1.65"               # 上游 tag；跟着它升级时，patches/ 里的补丁要重新生成
+AERIAL_VER="1.65"
 WORK="${AERIAL_SRC:-$REPO_ROOT/../aerial-tv}"
 PATCH="$REPO_ROOT/patches/aerial-tv-p3.patch"
 APK="$REPO_ROOT/apk/aerial-tv-$AERIAL_VER-p3.apk"
@@ -34,7 +36,7 @@ if [ "$1" != "--apk" ]; then
     info "clone 上游 → $WORK"
     git clone "$UPSTREAM" "$WORK" || die "clone 失败"
   fi
-  (cd "$WORK" && git checkout -q "$PINNED_COMMIT") || warn "无法切到 $PINNED_COMMIT，用当前 HEAD 试试"
+  (cd "$WORK" && git checkout -q "$PINNED_REF") || warn "无法切到 $PINNED_REF，用当前 HEAD 试试"
 
   info "应用补丁"
   (cd "$WORK" && git apply --check "$PATCH" 2>/dev/null && git apply "$PATCH") \

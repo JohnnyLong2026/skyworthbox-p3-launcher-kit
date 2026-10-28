@@ -1,6 +1,6 @@
 # 03 Aerial 桌面部署
 
-上游：[pengchujin/aerial-tv](https://github.com/pengchujin/aerial-tv)，本仓库基于提交 `2b2eb21`（1.61，versionCode 75）。
+上游：[pengchujin/aerial-tv](https://github.com/pengchujin/aerial-tv)，本仓库基于 tag `v1.65`（versionCode 79）。
 
 ## 一键装（用现成 APK）
 
@@ -15,7 +15,7 @@ export ANDROID_HOME=/path/to/android-sdk
 ./scripts/21-build-aerial.sh
 ```
 
-脚本会：clone 上游 → checkout `2b2eb21` → 应用 `patches/aerial-tv-p3.patch` →
+脚本会：clone 上游 → checkout `v1.65` → 应用 `patches/aerial-tv-p3.patch` →
 `./gradlew assembleStandardRelease` → 安装 → `cmd package set-home-activity` → 停用官方桌面。
 
 首次编译约 9 分钟，增量约 2 分钟。签名用本机 debug key（**不能覆盖官方包升级**，升级必须重新编译）。
